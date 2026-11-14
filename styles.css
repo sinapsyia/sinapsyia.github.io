@@ -428,9 +428,9 @@ p { margin: 0 0 1em; }
 .footer__bottom { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--faint); font-size: .85rem; }
 .footer__bottom p { margin: 0; }
 
-/* WhatsApp flutuante */
+/* WhatsApp flutuante (à esquerda: o canto direito é do widget do agente SquadOS) */
 .wa-float {
-  position: fixed; right: 20px; bottom: 20px; z-index: 40;
+  position: fixed; left: 20px; bottom: 20px; z-index: 40;
   width: 58px; height: 58px; border-radius: 50%;
   display: grid; place-items: center;
   background: #25D366; color: #fff;
