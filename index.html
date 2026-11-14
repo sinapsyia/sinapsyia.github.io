@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SinapsyIA | Agentes de IA para empresas</title>
+  <meta name="description" content="A SinapsyIA coloca a inteligência artificial para trabalhar no seu negócio: diagnóstico de IA gratuito, agentes de IA sob medida e automação de processos.">
+  <meta name="theme-color" content="#0B1020">
+
+  <!-- Compartilhamento (WhatsApp, Instagram, LinkedIn) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SinapsyIA | Agentes de IA para empresas">
+  <meta property="og:description" content="Diagnóstico de IA gratuito, agentes sob medida e automação de processos para o seu negócio.">
+  <!-- Se o seu usuário do GitHub não for "sinapsyia", troque o endereço abaixo -->
+  <meta property="og:url" content="https://sinapsyia.github.io/">
+  <meta property="og:image" content="https://sinapsyia.github.io/assets/og-image.png">
+  <meta property="og:locale" content="pt_BR">
+
+  <link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+  <!-- Ícones reutilizáveis -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.3 4.8 4.9-1.3A9.8 9.8 0 1 0 12 2.2Zm0 17.9c-1.5 0-3-.4-4.2-1.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.1 8.1 0 1 1 12 20.1Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></symbol>
+    <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  </svg>
+
+  <!-- ===== CABEÇALHO ===== -->
+  <header class="header" id="topo">
+    <div class="container header__inner">
+      <a href="#topo" class="brand" aria-label="SinapsyIA, início">
+        <img src="assets/logo-mark.svg" alt="" width="34" height="34">
+        <span>Sinapsy<b class="grad-text">IA</b></span>
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Principal">
+        <a href="#servicos">Serviços</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#exemplos">Exemplos</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#faq">Dúvidas</a>
+        <a href="https://ig.me/m/sinapsyia" target="_blank" rel="noopener" class="btn btn--sm btn--primary nav__cta" data-contact>
+          Falar com a gente
+        </a>
+      </nav>
+
+      <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <canvas id="synapse" aria-hidden="true"></canvas>
+      <div class="hero__glow" aria-hidden="true"></div>
+
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <p class="pill reveal"><span class="pill__dot"></span>Diagnóstico de IA gratuito e sem compromisso</p>
+          <h1 class="reveal">IA que <span class="grad-text">trabalha</span> pelo seu negócio. Inclusive às 3h da manhã.</h1>
+          <p class="lead reveal">Criamos agentes de IA e automações sob medida que atendem clientes, agendam, qualificam e organizam. Sua equipe fica livre para o que só gente faz.</p>
+          <div class="hero__ctas reveal">
+            <a href="https://ig.me/m/sinapsyia" target="_blank" rel="noopener" class="btn btn--primary btn--lg" data-contact>
+              <svg class="ico" data-contact-icon><use href="#i-ig"/></svg>
+              Quero meu diagnóstico
+            </a>
+            <a href="#exemplos" class="btn btn--ghost btn--lg">
+              Ver o agente em ação
+              <svg class="ico"><use href="#i-arrow"/></svg>
+            </a>
+          </div>
+          <ul class="hero__chips reveal" aria-label="Diferenciais">
+            <li><svg class="ico"><use href="#i-check"/></svg>Sob medida</li>
+            <li><svg class="ico"><use href="#i-check"/></svg>Sem tecniquês</li>
+            <li><svg class="ico"><use href="#i-check"/></svg>De acordo com a LGPD</li>
+          </ul>
+        </div>
+
+        <!-- Demo do agente -->
+        <div class="demo reveal" aria-label="Demonstração ilustrativa de um agente de IA atendendo um cliente">
+          <div class="demo__bar">
+            <div class="demo__avatar"><img src="assets/logo-mark.svg" alt="" width="26" height="26"></div>
+            <div>
+              <p class="demo__name" id="demoName">Agente da Clínica</p>
+              <p class="demo__status"><span class="dot-live"></span>online agora · responde em segundos</p>
+            </div>
+          </div>
+          <div class="demo__body" id="demoBody" aria-live="off">
+            <p class="msg msg--in">Oi! Tem horário pra limpeza de pele essa semana?</p>
+            <p class="msg msg--out">Olá! 😊 Temos quinta às 14h ou sexta às 10h. Qual fica melhor?</p>
+            <p class="msg msg--in">Sexta às 10h</p>
+            <p class="msg msg--out">Prontinho, agendado! Te mando um lembrete na véspera ✅</p>
+          </div>
+          <div class="demo__foot">
+            <span class="demo__tag" id="demoTag">Agendamento automático</span>
+            <span class="demo__time">23:47</span>
+          </div>
+          <p class="demo__note">Conversa ilustrativa</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAIXA ===== -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>Atendimento 24h</span><span>Agendamentos</span><span>Qualificação de leads</span><span>Follow-up automático</span><span>Relatórios sem esforço</span><span>WhatsApp e Instagram</span><span>Integração com CRM</span><span>Planilhas que se preenchem sozinhas</span>
+        <span>Atendimento 24h</span><span>Agendamentos</span><span>Qualificação de leads</span><span>Follow-up automático</span><span>Relatórios sem esforço</span><span>WhatsApp e Instagram</span><span>Integração com CRM</span><span>Planilhas que se preenchem sozinhas</span>
+      </div>
+    </div>
+
+    <!-- ===== PROBLEMA ===== -->
+    <section class="section" id="problema">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Você se identifica?</p>
+          <h2>Todo mundo fala de IA. Pouca gente sabe <span class="grad-text">por onde começar.</span></h2>
+        </div>
+        <div class="pains">
+          <article class="pain reveal">
+            <span class="pain__n">01</span>
+            <h3>Equipe presa no operacional</h3>
+            <p>Responder as mesmas perguntas, copiar dados, montar relatório na mão. Horas por semana que poderiam ir para vender e crescer.</p>
+          </article>
+          <article class="pain reveal">
+            <span class="pain__n">02</span>
+            <h3>Cliente esperando resposta</h3>
+            <p>A mensagem chega à noite, no fim de semana, no horário de pico. Quem demora a responder perde a venda para o concorrente.</p>
+          </article>
+          <article class="pain reveal">
+            <span class="pain__n">03</span>
+            <h3>Ferramenta demais, resultado de menos</h3>
+            <p>Já testou o ChatGPT, assinou ferramentas, viu vídeos, mas nada virou processo. A IA ficou como curiosidade, não como parte do negócio.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SERVIÇOS (BENTO) ===== -->
+    <section class="section" id="servicos">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Serviços</p>
+          <h2>Da estratégia à <span class="grad-text">IA funcionando</span></h2>
+          <p class="section__sub">Três frentes que se completam. Você pode começar por qualquer uma.</p>
+        </div>
+
+        <div class="bento">
+          <!-- Agentes -->
+          <article class="tile tile--agents reveal">
+            <span class="badge">Carro-chefe</span>
+            <p class="tile__kicker">02 · Agentes de IA sob medida</p>
+            <h3>Um atendente que conhece sua empresa e nunca tira folga</h3>
+            <p>Criamos e treinamos agentes com o conhecimento do seu negócio. Eles respondem, agendam, qualificam e passam para a sua equipe quando precisa de um humano.</p>
+            <ul class="checks">
+              <li><svg class="ico"><use href="#i-check"/></svg>Atendimento no WhatsApp e no Instagram</li>
+              <li><svg class="ico"><use href="#i-check"/></svg>Qualificação de leads e pré-venda</li>
+              <li><svg class="ico"><use href="#i-check"/></svg>Agendamentos e follow-up automáticos</li>
+            </ul>
+            <ul class="feed" aria-label="Exemplo ilustrativo do que um agente faz numa noite">
+              <li><span class="feed__ico">💬</span><span><b>Dúvidas respondidas</b> sobre horários e valores</span><time>22:10</time></li>
+              <li><span class="feed__ico">📅</span><span><b>Consulta confirmada</b> e lembrete agendado</span><time>23:47</time></li>
+              <li><span class="feed__ico">🎯</span><span><b>Lead qualificado</b> e registrado no CRM</span><time>01:12</time></li>
+              <li><span class="feed__ico">🙋</span><span><b>Caso sensível</b> passado para a sua equipe</span><time>07:58</time></li>
+            </ul>
+            <div class="handoff" aria-hidden="true">
+              <span class="handoff__node handoff__node--ai">Agente IA</span>
+              <span class="handoff__line"></span>
+              <span class="handoff__node">Sua equipe</span>
+            </div>
+          </article>
+
+          <!-- Diagnóstico -->
+          <article class="tile tile--diag reveal">
+            <p class="tile__kicker">01 · Consultoria e diagnóstico</p>
+            <h3>Onde a IA dá mais retorno, com menos esforço</h3>
+            <p>Mapeamos seus processos e entregamos um plano de ação priorizado.</p>
+            <div class="matrix" aria-label="Matriz impacto por esforço">
+              <span class="matrix__cell matrix__cell--win">Ganho rápido</span>
+              <span class="matrix__cell">Grande aposta</span>
+              <span class="matrix__cell">Complemento</span>
+              <span class="matrix__cell matrix__cell--off">Evitar</span>
+              <span class="matrix__y">Impacto</span>
+              <span class="matrix__x">Esforço</span>
+            </div>
+          </article>
+
+          <!-- Automação -->
+          <article class="tile tile--auto reveal">
+            <p class="tile__kicker">03 · Automação de processos</p>
+            <h3>Informação que flui sozinha</h3>
+            <p>Conectamos planilhas, CRM, e-mail e WhatsApp, com IA no meio do caminho. Sem retrabalho, sem erro de digitação.</p>
+            <div class="flow" aria-hidden="true">
+              <span>Formulário</span><i></i><span class="flow__ai">IA</span><i></i><span>CRM</span><i></i><span>Relatório</span>
+            </div>
+          </article>
+
+          <!-- Pequenos -->
+          <article class="tile tile--stat reveal">
+            <p class="stat">24/7</p>
+            <p>O agente atende de madrugada, no feriado e no horário de pico.</p>
+          </article>
+          <article class="tile tile--stat reveal">
+            <p class="stat">LGPD</p>
+            <p>O agente usa só as informações que você aprovar, com cuidado no tratamento de dados.</p>
+          </article>
+          <article class="tile tile--stat reveal">
+            <p class="stat">0</p>
+            <p>Tecniquês. A gente cuida da parte técnica e explica tudo em linguagem simples.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== COMO FUNCIONA ===== -->
+    <section class="section section--band" id="como-funciona">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Como funciona</p>
+          <h2>Um caminho simples, <span class="grad-text">em 4 etapas</span></h2>
+        </div>
+
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step__n">1</span>
+            <h3>Conversa inicial</h3>
+            <p>Você chama a gente e conta como o seu negócio funciona hoje.</p>
+            <span class="step__tag">Grátis</span>
+          </li>
+          <li class="step reveal">
+            <span class="step__n">2</span>
+            <h3>Diagnóstico</h3>
+            <p>Mapeamos tarefas e gargalos e apontamos as oportunidades de IA com maior retorno.</p>
+            <span class="step__tag">Grátis</span>
+          </li>
+          <li class="step reveal">
+            <span class="step__n">3</span>
+            <h3>Construção</h3>
+            <p>Desenvolvemos e treinamos o agente ou a automação com os dados e o jeito de falar da sua empresa.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__n">4</span>
+            <h3>Acompanhamento</h3>
+            <p>Colocamos no ar, medimos os resultados e ajustamos até ficar redondo.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== EXEMPLOS ===== -->
+    <section class="section" id="exemplos">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Na prática</p>
+          <h2>O que a IA pode fazer <span class="grad-text">no seu segmento</span></h2>
+          <p class="section__sub">Exemplos para inspirar. Cada projeto é desenhado para a realidade de cada empresa.</p>
+        </div>
+
+        <div class="tabs reveal" role="tablist" aria-label="Segmentos">
+          <button role="tab" aria-selected="true" aria-controls="tab-saude" id="t-saude">Clínicas e saúde</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-varejo" id="t-varejo" tabindex="-1">Varejo e e-commerce</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-servicos" id="t-servicos" tabindex="-1">Prestadores de serviço</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-imob" id="t-imob" tabindex="-1">Imobiliárias</button>
+        </div>
+
+        <div class="tabpanels reveal">
+          <div class="tabpanel" role="tabpanel" id="tab-saude" aria-labelledby="t-saude">
+            <div class="example">
+              <div class="example__text">
+                <h3>Agente de agendamento e confirmação</h3>
+                <ul class="checks">
+                  <li><svg class="ico"><use href="#i-check"/></svg>Responde dúvidas sobre procedimentos, convênios e valores</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Marca, remarca e confirma consultas direto na agenda</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Envia lembretes e reduz faltas</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Encaminha casos sensíveis para a recepção</li>
+                </ul>
+              </div>
+              <div class="chat" aria-label="Exemplo ilustrativo de conversa">
+                <p class="msg msg--in">Vocês atendem pelo meu convênio?</p>
+                <p class="msg msg--out">Atendemos sim! Para qual especialidade você procura horário?</p>
+                <p class="msg msg--in">Dermatologia, de preferência à tarde</p>
+                <p class="msg msg--out">Tenho terça às 15h30 com a Dra. Ana. Posso confirmar? 📅</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabpanel" role="tabpanel" id="tab-varejo" aria-labelledby="t-varejo" hidden>
+            <div class="example">
+              <div class="example__text">
+                <h3>Vendedor virtual e pós-venda</h3>
+                <ul class="checks">
+                  <li><svg class="ico"><use href="#i-check"/></svg>Tira dúvidas sobre produtos, tamanhos e prazos de entrega</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Recomenda produtos com base no que o cliente procura</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Informa o status do pedido automaticamente</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Recupera carrinhos abandonados com mensagens personalizadas</li>
+                </ul>
+              </div>
+              <div class="chat" aria-label="Exemplo ilustrativo de conversa">
+                <p class="msg msg--in">Esse tênis tem no 40? Chega até sábado em Recife?</p>
+                <p class="msg msg--out">Tem sim, no preto e no branco! Comprando hoje, chega até sexta. Quer o link de qual?</p>
+                <p class="msg msg--in">Preto!</p>
+                <p class="msg msg--out">Aqui está 👉 link do produto. Com o cupom BEMVINDO o frete sai grátis 🚚</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabpanel" role="tabpanel" id="tab-servicos" aria-labelledby="t-servicos" hidden>
+            <div class="example">
+              <div class="example__text">
+                <h3>Pré-atendimento e qualificação de clientes</h3>
+                <ul class="checks">
+                  <li><svg class="ico"><use href="#i-check"/></svg>Entende a necessidade do cliente com perguntas certeiras</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Gera um pré-orçamento ou envia o portfólio certo</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Registra tudo no CRM ou planilha automaticamente</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Passa para você só os clientes prontos para fechar</li>
+                </ul>
+              </div>
+              <div class="chat" aria-label="Exemplo ilustrativo de conversa">
+                <p class="msg msg--in">Quanto custa para fazer a contabilidade da minha empresa?</p>
+                <p class="msg msg--out">Vou te ajudar! Sua empresa é MEI, Simples Nacional ou outro regime? Tem funcionários?</p>
+                <p class="msg msg--in">Simples, com 3 funcionários</p>
+                <p class="msg msg--out">Perfeito! Passei seus dados para o especialista, que te envia a proposta hoje até as 17h 📋</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabpanel" role="tabpanel" id="tab-imob" aria-labelledby="t-imob" hidden>
+            <div class="example">
+              <div class="example__text">
+                <h3>Atendimento de leads de imóveis</h3>
+                <ul class="checks">
+                  <li><svg class="ico"><use href="#i-check"/></svg>Responde na hora quem chega pelos anúncios</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Filtra por região, faixa de preço e tipo de imóvel</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Envia opções compatíveis com fotos e detalhes</li>
+                  <li><svg class="ico"><use href="#i-check"/></svg>Agenda visitas direto na agenda do corretor</li>
+                </ul>
+              </div>
+              <div class="chat" aria-label="Exemplo ilustrativo de conversa">
+                <p class="msg msg--in">Vi o anúncio do apartamento de 2 quartos. Ainda está disponível?</p>
+                <p class="msg msg--out">Está sim! Separei mais 2 opções parecidas na mesma região. Quer agendar uma visita?</p>
+                <p class="msg msg--in">Quero, sábado de manhã</p>
+                <p class="msg msg--out">Visita marcada para sábado às 10h com o corretor Lucas. Te envio a localização 📍</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note">*Conversas ilustrativas, criadas para demonstrar o funcionamento de um agente. Outros segmentos também podem ser atendidos.</p>
+      </div>
+    </section>
+
+    <!-- ===== SOBRE ===== -->
+    <section class="section section--band" id="sobre">
+      <div class="container about">
+        <div class="about__text reveal">
+          <p class="eyebrow">Sobre a SinapsyIA</p>
+          <h2>A conexão entre a IA e o <span class="grad-text">dia a dia</span> da sua empresa</h2>
+          <p>Uma sinapse é a conexão entre dois neurônios: é ali que a informação vira ação. A SinapsyIA nasceu com esse propósito.</p>
+          <p>Nossa missão é tornar a IA acessível e útil para empresas de todos os tamanhos, com soluções práticas, explicadas em linguagem simples, que geram resultado no caixa e no tempo da equipe.</p>
+        </div>
+        <ul class="values">
+          <li class="value reveal">
+            <h3>Prática antes de hype</h3>
+            <p>Só recomendamos o que faz sentido para o seu negócio, mesmo que seja algo simples.</p>
+          </li>
+          <li class="value reveal">
+            <h3>Feito sob medida</h3>
+            <p>Cada agente aprende o seu jeito de atender, os seus produtos e as suas regras.</p>
+          </li>
+          <li class="value reveal">
+            <h3>Transparência</h3>
+            <p>Você entende o que está sendo construído, o que a IA faz e o que ela não faz.</p>
+          </li>
+          <li class="value reveal">
+            <h3>Dados protegidos</h3>
+            <p>Informações da sua empresa e dos seus clientes tratadas com cuidado, de acordo com a LGPD.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section" id="faq">
+      <div class="container faq-wrap">
+        <div class="section__head section__head--left reveal">
+          <p class="eyebrow">Dúvidas frequentes</p>
+          <h2>Perguntas <span class="grad-text">comuns</span></h2>
+          <p class="section__sub">Não achou o que procurava? Chama a gente que respondemos.</p>
+        </div>
+
+        <div class="faq">
+          <details class="reveal">
+            <summary>Preciso entender de tecnologia para contratar?</summary>
+            <p>Não. A gente cuida da parte técnica e explica tudo em linguagem simples. Você só precisa conhecer bem o seu negócio, e isso você já conhece.</p>
+          </details>
+          <details class="reveal">
+            <summary>O agente de IA vai substituir minha equipe?</summary>
+            <p>A ideia é tirar da equipe as tarefas repetitivas para que as pessoas foquem no que exige atenção humana: negociar, resolver casos complexos e cuidar do cliente. O agente sempre pode passar o atendimento para uma pessoa.</p>
+          </details>
+          <details class="reveal">
+            <summary>Funciona para empresas pequenas?</summary>
+            <p>Sim. Muitas vezes é nas pequenas empresas que a IA faz mais diferença, porque cada hora economizada conta. Começamos pelo que traz mais retorno com menor investimento.</p>
+          </details>
+          <details class="reveal">
+            <summary>Quanto custa?</summary>
+            <p>Depende do tamanho e da complexidade do projeto. Por isso começamos com um diagnóstico gratuito: entendemos sua necessidade e enviamos uma proposta sob medida, sem surpresas.</p>
+          </details>
+          <details class="reveal">
+            <summary>Quanto tempo leva para ficar pronto?</summary>
+            <p>Projetos mais simples podem ficar prontos em poucas semanas. Depois do diagnóstico, você recebe um cronograma claro com cada etapa.</p>
+          </details>
+          <details class="reveal">
+            <summary>E se o agente responder algo errado?</summary>
+            <p>O agente é treinado só com as informações que você aprova e segue regras definidas junto com você. Durante o acompanhamento, revisamos as conversas e fazemos ajustes contínuos.</p>
+          </details>
+          <details class="reveal">
+            <summary>O diagnóstico tem algum compromisso?</summary>
+            <p>Não. A conversa inicial e o diagnóstico são gratuitos e sem compromisso.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CTA FINAL ===== -->
+    <section class="section section--cta" id="contato">
+      <div class="container">
+        <div class="cta reveal">
+          <img src="assets/logo-mark.svg" alt="" width="64" height="64" class="cta__mark">
+          <h2>Vamos descobrir onde a IA pode ajudar a sua empresa?</h2>
+          <p>Mande uma mensagem e agende seu diagnóstico gratuito. Sem compromisso.</p>
+          <div class="cta__btns">
+            <a href="#" target="_blank" rel="noopener" class="btn btn--light btn--lg" data-whatsapp hidden>
+              <svg class="ico ico--fill"><use href="#i-wa"/></svg>
+              Chamar no WhatsApp
+            </a>
+            <a href="https://ig.me/m/sinapsyia" target="_blank" rel="noopener" class="btn btn--lg btn--glass" data-ig-cta>
+              <svg class="ico"><use href="#i-ig"/></svg>
+              Chamar no Instagram
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== RODAPÉ ===== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div>
+        <a href="#topo" class="brand">
+          <img src="assets/logo-mark.svg" alt="" width="30" height="30">
+          <span>Sinapsy<b class="grad-text">IA</b></span>
+        </a>
+        <p class="footer__tag">Consultoria e agentes de IA para empresas</p>
+      </div>
+      <ul class="footer__links">
+        <li data-whatsapp-item hidden>
+          <a href="#" target="_blank" rel="noopener" data-whatsapp>
+            <svg class="ico ico--fill"><use href="#i-wa"/></svg>
+            WhatsApp
+          </a>
+        </li>
+        <li>
+          <a href="https://www.instagram.com/sinapsyia/" target="_blank" rel="noopener">
+            <svg class="ico"><use href="#i-ig"/></svg>
+            @sinapsyia
+          </a>
+        </li>
+        <li>
+          <a href="mailto:sinapsyia.oficial@gmail.com">
+            <svg class="ico"><use href="#i-mail"/></svg>
+            sinapsyia.oficial@gmail.com
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="container footer__bottom">
+      <p>© <span id="ano">2026</span> SinapsyIA. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Botão flutuante de WhatsApp (aparece quando o número estiver configurado no script.js) -->
+  <a href="#" class="wa-float" target="_blank" rel="noopener" aria-label="Conversar no WhatsApp" data-whatsapp hidden>
+    <svg class="ico ico--fill"><use href="#i-wa"/></svg>
+  </a>
+
+  <script src="script.js"></script>
+</body>
+</html>
