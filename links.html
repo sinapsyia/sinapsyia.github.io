@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SinapsyIA | Links</title>
+  <meta name="description" content="Diagnóstico de IA gratuito, site e contato da SinapsyIA.">
+  <meta name="theme-color" content="#0B1020">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SinapsyIA | Links">
+  <meta property="og:description" content="Diagnóstico de IA gratuito, site e contato da SinapsyIA.">
+  <meta property="og:url" content="https://sinapsyia.github.io/links.html">
+  <meta property="og:image" content="https://sinapsyia.github.io/assets/og-image.png">
+  <meta property="og:locale" content="pt_BR">
+  <link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0B1020; --surface:#11182F; --line:rgba(160,170,230,.18); --line-strong:rgba(160,170,230,.34);
+      --fg:#E9ECFB; --muted:#9BA3C6; --cyan:#22D3EE;
+      --grad:linear-gradient(135deg,#7C3AED 0%,#06B6D4 100%);
+      color-scheme:dark;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg)}
+    body{
+      margin:0; min-height:100vh; min-height:100dvh;
+      background:
+        radial-gradient(600px 380px at 50% -120px, rgba(124,58,237,.32), transparent 70%),
+        radial-gradient(500px 320px at 50% 110%, rgba(6,182,212,.16), transparent 70%),
+        var(--bg);
+      color:var(--fg); font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; line-height:1.5;
+      display:flex; justify-content:center;
+      padding:max(48px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(40px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+    }
+    main{width:100%; max-width:440px; display:flex; flex-direction:column; align-items:center; text-align:center}
+    .logo{width:88px; height:88px; border-radius:24px; background:var(--surface); border:1px solid var(--line-strong);
+      display:grid; place-items:center; box-shadow:0 12px 40px rgba(124,58,237,.25)}
+    .logo img{width:62px; height:62px}
+    h1{font-family:'Poppins',system-ui,sans-serif; font-weight:700; font-size:26px; margin:18px 0 4px; letter-spacing:-.01em}
+    .handle{color:var(--cyan); font-size:14px; font-weight:500; margin:0}
+    .bio{color:var(--muted); font-size:15.5px; margin:12px 0 30px; max-width:34ch; text-wrap:balance}
+    nav{width:100%; display:flex; flex-direction:column; gap:12px}
+    .btn{display:flex; align-items:center; gap:14px; width:100%; min-height:60px; padding:12px 18px;
+      border-radius:16px; text-decoration:none; color:var(--fg); text-align:left;
+      background:var(--surface); border:1px solid var(--line-strong);
+      transition:transform .15s ease, border-color .15s ease, background .15s ease}
+    .btn:hover{border-color:var(--cyan); transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn:focus-visible{outline:2px solid var(--cyan); outline-offset:3px}
+    .btn svg{flex:none; width:24px; height:24px}
+    .btn .txt{flex:1; display:flex; flex-direction:column; min-width:0}
+    .btn .t{font-family:'Poppins',system-ui,sans-serif; font-weight:600; font-size:16px}
+    .btn .s{font-size:13px; color:var(--muted)}
+    .btn .arrow{flex:none; width:18px; height:18px; opacity:.6}
+    .btn.main{background:var(--grad); border-color:transparent; min-height:72px; box-shadow:0 10px 30px rgba(124,58,237,.35)}
+    .btn.main .s{color:rgba(255,255,255,.85)}
+    .btn.main .arrow{opacity:.9}
+    .btn.main:hover{border-color:transparent; filter:brightness(1.06)}
+    .tag{display:inline-block; align-self:flex-start; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      background:rgba(11,16,32,.35); border-radius:99px; padding:2px 8px; margin-bottom:4px}
+    .toast{min-height:20px; margin:14px 0 0; font-size:13px; color:var(--cyan); opacity:0; transition:opacity .2s}
+    .toast.on{opacity:1}
+    footer{margin-top:22px; font-size:12.5px; color:#6B739A}
+    @media (prefers-reduced-motion:reduce){.btn{transition:none}.btn:hover{transform:none}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="logo"><img src="assets/logo-mark.svg" alt="Logo SinapsyIA"></div>
+    <h1>SinapsyIA</h1>
+    <p class="handle">@sinapsyia</p>
+    <p class="bio">Agentes de IA e automação para o seu negócio vender mais e trabalhar menos.</p>
+
+    <nav aria-label="Links da SinapsyIA">
+      <a class="btn" href="https://www.instagram.com/sinapsyia/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F472B6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        <span class="txt"><span class="t">Instagram</span></span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+
+      <a class="btn" href="https://sinapsyia.github.io/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <span class="txt"><span class="t">Conhecer o site</span><span class="s">Serviços, como funciona e perguntas frequentes</span></span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+
+      <a class="btn" id="email" href="mailto:sinapsyia.oficial@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <span class="txt"><span class="t">Enviar um e-mail</span><span class="s">sinapsyia.oficial@gmail.com</span></span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </nav>
+
+    <p class="toast" id="toast" role="status"></p>
+    <footer>© SinapsyIA · Inteligência artificial para negócios</footer>
+  </main>
+  <script>
+    // Abre o app de e-mail da pessoa com o endereço já no "Para" (mailto).
+    // Também copia o endereço, para o caso de o celular não ter app de e-mail configurado.
+    (function(){
+      var a=document.getElementById('email'), t=document.getElementById('toast'), mail='sinapsyia.oficial@gmail.com';
+      a.addEventListener('click',function(){
+        try{
+          if(navigator.clipboard){ navigator.clipboard.writeText(mail).then(function(){
+            t.textContent='E-mail copiado: '+mail; t.classList.add('on');
+            setTimeout(function(){ t.classList.remove('on'); },3500);
+          },function(){}); }
+        }catch(e){}
+      });
+    })();
+  </script>
+</body>
+</html>
