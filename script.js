@@ -53,7 +53,21 @@
   }
   menuBtn.addEventListener('click', function () { setMenu(!nav.classList.contains('is-open')); });
   nav.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { setMenu(false); setTools(false); } });
+
+  // ---------- Menu "Ferramentas" ----------
+  var tools = document.getElementById('tools');
+  var toolsBtn = document.getElementById('toolsBtn');
+  function setTools(open) {
+    if (!tools) return;
+    tools.classList.toggle('is-open', open);
+    toolsBtn.setAttribute('aria-expanded', String(open));
+  }
+  if (tools) {
+    toolsBtn.addEventListener('click', function (e) { e.stopPropagation(); setTools(!tools.classList.contains('is-open')); });
+    document.addEventListener('click', function (e) { if (!tools.contains(e.target)) setTools(false); });
+    tools.addEventListener('click', function (e) { if (e.target.closest('a')) setTools(false); });
+  }
 
   // ---------- Animação de entrada ----------
   var revealEls = document.querySelectorAll('.reveal');
