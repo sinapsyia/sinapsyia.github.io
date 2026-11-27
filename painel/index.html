@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Painel · SinapsyIA</title>
+<link rel="icon" type="image/svg+xml" href="../assets/logo-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#0B1020;--surface:#121a30;--surface-2:#18223d;--line:#25304f;--fg:#E9ECFB;--muted:#9BA3C6;--accent:#8B5CF6;--accent-2:#22D3EE;--ok:#34d399;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 Inter,system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 64px}
+h1,h2,h3{font-family:Poppins,sans-serif;margin:0;line-height:1.2}
+h1{font-size:26px}h2{font-size:19px}h3{font-size:15px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand{display:flex;align-items:center;gap:10px;font-family:Poppins;font-weight:600;flex:1}
+.brand img{width:28px;height:28px}
+.bell{position:relative;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 14px Inter;cursor:pointer;text-decoration:none}
+.bell .n{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:linear-gradient(135deg,#7C3AED,#06B6D4);font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:18px}
+.card.hi{border-color:rgba(34,211,238,.45);box-shadow:0 0 0 3px rgba(34,211,238,.08)}
+.muted{color:var(--muted)}
+label{display:block;font-size:13.5px;color:var(--muted)}
+input{width:100%;margin-top:6px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);font:inherit}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);font:600 14px Inter;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.primary{background:linear-gradient(135deg,#7C3AED,#06B6D4);border:0}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn:disabled{opacity:.6;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:12px;align-items:end;margin-top:14px}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+.tool{display:block;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);text-decoration:none;position:relative}
+.tool:hover{border-color:var(--accent)}
+.tool small{display:block;color:var(--muted);margin-top:4px}
+.tool .n{position:absolute;top:12px;right:12px}
+.msg{font-size:13.5px;margin-top:10px;min-height:1em}
+.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+.item{border-top:1px solid var(--line);padding:12px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.item:first-of-type{border-top:0}
+.item .who{flex:1;min-width:180px}
+.item .who b{display:block}
+.item .who span{font-size:13px;color:var(--muted)}
+.tag{font:600 11.5px Inter;letter-spacing:.03em;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.new{color:var(--accent-2);border-color:rgba(34,211,238,.45)}
+.tag.off{color:var(--bad);border-color:rgba(248,113,113,.4)}
+.code{font:600 13.5px ui-monospace,Consolas,monospace;letter-spacing:.04em;color:var(--accent-2)}
+pre{white-space:pre-wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:14px;font:13px/1.5 ui-monospace,Consolas,monospace;margin:0;max-height:460px;overflow:auto;width:100%}
+code{font-family:ui-monospace,Consolas,monospace;font-size:13px;color:var(--accent-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand"><img src="../assets/logo-mark.svg" alt="">SinapsyIA · Painel</div><span id="bellBox"></span></div>
+  <div id="app"><p class="muted">Carregando…</p></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../ferramentas/config.js"></script>
+<script src="../ferramentas/sinapsy-runtime.js"></script>
+<script>
+(function(){
+  const A = window.SinapsyAuth, AC = window.SinapsyAcesso, app = document.getElementById('app');
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const BASE = new URL('../', location.href).href;           // raiz do site
+  const FERR = {
+    onboarding:   {nome:'Onboarding',        pag:'onboarding/',  ico:'📝'},
+    diagnosticos: {nome:'Diagnóstico de IA', pag:'diagnostico/', ico:'🧭'},
+    envios:       {nome:'Criação de App',    pag:'criar-app/',   ico:'📱'}
+  };
+  const ALFA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let SESSAO=null, DB=null, ERRO='';
+  const DADOS = {onboarding:null, diagnosticos:null, envios:null, codigos:null};
+  let ABERTO=null, EDIT=null, CMSG='', CERR=false, FOCO='';
+
+  // ---------- util ----------
+  const quando = d => { const t=d.criadoEm||Date.parse(d.created_at||'')||0; return t?new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''; };
+  const tempo = d => d.criadoEm||0;
+  function quem(col,d){
+    if(col==='onboarding') return d.nome||d.link||'Sem nome';
+    if(col==='diagnosticos') return d.empresa||'Sem nome';
+    return (d.contato&&d.contato.nome) ? d.contato.nome+' · '+(d.nome||'app') : (d.nome||'Sem nome');
+  }
+  // Só o que veio de clientes (o que você mesmo salva não vira aviso)
+  const doCliente = (col,d) => col!=='diagnosticos' || /cliente|site/.test(d.origem||'');
+  function novos(col){ return (DADOS[col]||[]).filter(d=>d.novo && doCliente(col,d)); }
+  function totalNovos(){ return Object.keys(FERR).reduce((n,c)=>n+novos(c).length,0); }
+  function nomeCodigo(acesso){ if(!acesso) return ''; const c=(DADOS.codigos||[]).find(x=>AC.norm(x.codigo)===AC.norm(acesso)); return c?c.nome:''; }
+  function slug(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+  function gerarCodigo(nome){
+    const p=AC.norm(String(nome).normalize('NFD').replace(/[̀-ͯ]/g,'')).replace(/[0-9]/g,'').slice(0,4)||'SNPY';
+    const r=crypto.getRandomValues(new Uint8Array(4));
+    return p+new Date().getFullYear()+'-'+Array.from(r,x=>ALFA[x%ALFA.length]).join('');
+  }
+  function usos(codigo){ const n=AC.norm(codigo); return Object.keys(FERR).reduce((t,c)=>t+(DADOS[c]||[]).filter(d=>AC.norm(d.acesso)===n).length,0); }
+  function mensagem(c){
+    return `Olá, ${c.nome}! Aqui está o seu código de acesso da SinapsyIA: ${c.codigo}\n\n`
+      + `Onboarding: ${BASE}onboarding/#${slug(c.nome)}\nDiagnóstico de IA: ${BASE}diagnostico/\nCriação de App: ${BASE}criar-app/\n\n`
+      + `É só abrir o link e digitar o código.`;
+  }
+
+  // ---------- telas ----------
+  function vConfig(){
+    return `<section class="card"><h1>Falta configurar</h1>
+      <p class="muted">Abra <code>ferramentas/config.js</code> e preencha <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code>. O passo a passo está em <code>COMO-PUBLICAR-FERRAMENTAS.txt</code>.</p></section>`;
+  }
+  function vLogin(){
+    return `<section class="card" style="max-width:440px">
+      <h1>Entrar</h1><p class="muted">Área só da SinapsyIA.</p>
+      <form id="login">
+        <label style="margin-top:12px">E-mail<input type="email" id="email" autocomplete="username" required></label>
+        <label style="margin-top:12px">Senha<input type="password" id="senha" autocomplete="current-password" required></label>
+        <div class="row"><button class="btn primary" type="submit">Entrar</button></div>
+        <p class="msg bad" id="lmsg"></p>
+      </form></section>`;
+  }
+  function vNovidades(){
+    const lista=[]; Object.keys(FERR).forEach(c=>novos(c).forEach(d=>lista.push([c,d])));
+    lista.sort((a,b)=>tempo(b[1])-tempo(a[1]));
+    const carregando = Object.keys(FERR).some(c=>DADOS[c]===null);
+    return `<section class="card ${lista.length?'hi':''}" id="novidades">
+      <h2>🔔 Respostas novas${lista.length?' ('+lista.length+')':''}</h2>
+      ${carregando&&!lista.length?'<p class="muted">Carregando…</p>':!lista.length?'<p class="muted" style="margin:8px 0 0">Nenhuma resposta nova. Quando um cliente enviar algo, aparece aqui.</p>':
+        lista.map(([c,d])=>`<div class="item"><div class="who"><b>${esc(quem(c,d))}</b><span>${FERR[c].ico} ${FERR[c].nome} · ${esc(quando(d))}${nomeCodigo(d.acesso)||d.acessoNome?' · código de '+esc(nomeCodigo(d.acesso)||d.acessoNome):''}</span></div>
+          <button class="btn sm primary" data-abrir="${c}:${esc(d.id)}">Abrir</button><button class="btn sm" data-lido="${c}:${esc(d.id)}">Marcar como lida</button></div>`).join('')}
+      <p class="msg bad">${esc(ERRO)}</p>
+    </section>`;
+  }
+  function vFerramentas(){
+    return `<section class="card"><div class="row" style="margin-top:0;justify-content:space-between"><div><h1>Olá!</h1><p class="muted" style="margin:4px 0 0">Logado como ${esc(SESSAO.user.email)}. Nas ferramentas você vê o painel do dono.</p></div><button class="btn sm" id="sair">Sair</button></div>
+      <div class="tools">${Object.keys(FERR).map(c=>{ const n=novos(c).length, f=FERR[c];
+        const sub = c==='onboarding'?'Respostas abaixo, neste painel':c==='diagnosticos'?'Meus diagnósticos, propostas e preços':'Respostas recebidas e PRDs';
+        return `<a class="tool" href="${c==='onboarding'?'#onboarding':'../'+f.pag}">${f.ico} ${f.nome}<small>${sub}</small>${n?`<span class="bell n" style="padding:0;border:0"><span class="n">${n}</span></span>`:''}</a>`; }).join('')}
+      </div></section>`;
+  }
+  function vCodigos(){
+    const lista=(DADOS.codigos||[]).slice().sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+    const linhas = DADOS.codigos===null ? '<p class="muted">Carregando…</p>' : !lista.length ? '<p class="muted">Nenhum código ainda. Crie o primeiro acima.</p>' :
+      lista.map(c=>{
+        if(EDIT===c.id) return `<div class="item" style="align-items:end">
+          <label style="flex:1;min-width:180px">Nome do cliente<input id="eNome" value="${esc(c.nome)}" maxlength="80"></label>
+          <label style="flex:1;min-width:160px">Código<input id="eCod" value="${esc(c.codigo)}" maxlength="40" autocapitalize="characters" spellcheck="false"></label>
+          <button class="btn sm primary" data-csalvar="${esc(c.id)}">Salvar</button><button class="btn sm" data-ccancel="1">Cancelar</button></div>`;
+        const ativo = c.ativo!==false, u=usos(c.codigo);
+        return `<div class="item"><div class="who"><b>${esc(c.nome)} <span class="code">${esc(c.codigo)}</span> ${ativo?'':'<span class="tag off">Desativado</span>'}</b><span>${u?('usado '+u+(u===1?' vez':' vezes')):'ainda não usado'}</span></div>
+          <button class="btn sm" data-cmsg="${esc(c.id)}">Copiar mensagem</button>
+          <button class="btn sm" data-cedit="${esc(c.id)}">Editar</button>
+          <button class="btn sm" data-cativo="${esc(c.id)}">${ativo?'Desativar':'Ativar'}</button>
+          <button class="btn sm" data-capagar="${esc(c.id)}">Apagar</button></div>`;
+      }).join('');
+    return `<section class="card" id="codigos">
+      <h2>🔑 Códigos de acesso</h2>
+      <p class="muted" style="margin:6px 0 0;font-size:14px">Cada cliente recebe um código que vale nas 3 ferramentas. Desativou, para de funcionar na hora. Deixe o código vazio para gerar um automático, ou escreva o seu (letras e números).</p>
+      <div class="grid">
+        <label>Nome do cliente<input id="cNome" placeholder="Ex.: Ana · Clínica Bem Viver" maxlength="80"></label>
+        <label>Código (opcional)<input id="cCod" placeholder="Ex.: ANA2026-K7P2" maxlength="40" autocapitalize="characters" spellcheck="false"></label>
+        <button class="btn primary" id="cCriar">Criar código</button>
+      </div>
+      <p class="msg ${CERR?'bad':'ok'}">${esc(CMSG)}</p>
+      ${linhas}
+    </section>`;
+  }
+  function vOnboarding(){
+    const lista=(DADOS.onboarding||[]).slice().sort((a,b)=>tempo(b)-tempo(a));
+    return `<section class="card" id="onboarding"><h2>📝 Respostas de onboarding</h2>
+      ${DADOS.onboarding===null?'<p class="muted">Carregando…</p>':!lista.length?'<p class="muted" style="margin:8px 0 0">Nenhum onboarding recebido ainda.</p>':
+        lista.map(d=>`<div class="item"><div class="who"><b>${esc(quem('onboarding',d))} ${d.novo?'<span class="tag new">Nova</span>':''}</b><span>${esc(quando(d))}${nomeCodigo(d.acesso)||d.acessoNome?' · código de '+esc(nomeCodigo(d.acesso)||d.acessoNome):''}</span></div>
+          <button class="btn sm" data-ver="${esc(d.id)}">${ABERTO===d.id?'Fechar':'Ver'}</button>
+          <button class="btn sm" data-copiar="${esc(d.id)}">Copiar</button>
+          <button class="btn sm" data-apagar="${esc(d.id)}">Apagar</button>
+          ${ABERTO===d.id?`<pre>${esc(d.texto||'')}</pre>`:''}</div>`).join('')}
+    </section>`;
+  }
+  function vChave(){
+    const tem=!!A.chaveIA();
+    return `<section class="card"><h2>🤖 IA no seu painel</h2>
+      <p class="muted" style="font-size:14px">Para gerar análises e PRDs com IA, cole a sua chave da API da Anthropic (console.anthropic.com > API Keys). Ela fica <b>só neste navegador</b>, nunca no site nem no banco. Cada uso é cobrado na sua conta da Anthropic.</p>
+      <label>Chave da API<input type="password" id="chave" placeholder="${tem?'Chave salva neste navegador':'sk-ant-...'}" autocomplete="off"></label>
+      <div class="row"><button class="btn primary" id="salvarChave">Salvar chave</button>${tem?'<button class="btn" id="tirarChave">Remover chave</button>':''}</div>
+      <p class="msg ok" id="kmsg"></p></section>`;
+  }
+  function render(){
+    if(!A || !A.configurado){ app.innerHTML=vConfig(); return; }
+    if(!SESSAO){ app.innerHTML=vLogin(); bindLogin(); return; }
+    // não redesenha enquanto você digita
+    const a=document.activeElement; if(a && a.tagName==='INPUT' && app.contains(a)) return;
+    const n=totalNovos();
+    document.title = (n?'('+n+') ':'')+'Painel · SinapsyIA';
+    document.getElementById('bellBox').innerHTML = `<a class="bell" href="#novidades">🔔 ${n?`<span class="n">${n}</span>`:'<span class="muted" style="font-weight:500">sem novidades</span>'}</a>`;
+    app.innerHTML = vNovidades()+vFerramentas()+vCodigos()+vOnboarding()+vChave();
+    bindPainel();
+    if(FOCO){ const el=document.getElementById(FOCO); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); FOCO=''; }
+  }
+
+  // ---------- ações ----------
+  function bindLogin(){
+    document.getElementById('login').onsubmit = async e => {
+      e.preventDefault();
+      const b=e.target.querySelector('button'); b.disabled=true; b.textContent='Entrando…';
+      const r=await A.entrar(document.getElementById('email').value.trim(), document.getElementById('senha').value);
+      if(r.error){ b.disabled=false; b.textContent='Entrar'; document.getElementById('lmsg').textContent='E-mail ou senha incorretos.'; return; }
+      location.reload();
+    };
+  }
+  async function marcarLido(col,id){ try{ await DB.collection(col).doc(id).update({novo:false}); }catch(e){ ERRO='Não consegui marcar como lida.'; render(); } }
+  function abrir(col,id){
+    if(col==='onboarding'){
+      const d=(DADOS.onboarding||[]).find(x=>x.id===id);
+      ABERTO=id; FOCO='onboarding'; if(d&&d.novo) marcarLido('onboarding',id); render(); return;
+    }
+    location.href = '../'+FERR[col].pag+'#abrir='+col+':'+encodeURIComponent(id);
+  }
+  function achaCodigo(id){ return (DADOS.codigos||[]).find(x=>x.id===id); }
+  function codigoRepetido(cod, menosId){ const n=AC.norm(cod); return (DADOS.codigos||[]).some(x=>x.id!==menosId && AC.norm(x.codigo)===n); }
+  function setCMsg(t,bad){ CMSG=t; CERR=!!bad; }
+  function bindPainel(){
+    const $=id=>document.getElementById(id);
+    $('sair').onclick = async()=>{ await A.sair(); location.reload(); };
+    $('salvarChave').onclick = ()=>{
+      const v=$('chave').value.trim();
+      if(!/^sk-ant-/.test(v)){ $('kmsg').textContent='Isso não parece uma chave da Anthropic (começa com sk-ant-).'; return; }
+      A.salvarChaveIA(v); $('chave').blur(); render(); $('kmsg').textContent='Chave salva neste navegador.';
+    };
+    const t=$('tirarChave'); if(t) t.onclick=()=>{ A.salvarChaveIA(''); render(); };
+    app.querySelectorAll('[data-abrir]').forEach(b=>b.onclick=()=>{ const [c,id]=b.dataset.abrir.split(/:(.+)/); abrir(c,id); });
+    app.querySelectorAll('[data-lido]').forEach(b=>b.onclick=()=>{ const [c,id]=b.dataset.lido.split(/:(.+)/); b.disabled=true; marcarLido(c,id); });
+    // onboarding
+    app.querySelectorAll('[data-ver]').forEach(b=>b.onclick=()=>{ const id=b.dataset.ver; if(ABERTO===id){ ABERTO=null; render(); } else abrir('onboarding',id); });
+    app.querySelectorAll('[data-copiar]').forEach(b=>b.onclick=async()=>{
+      const d=(DADOS.onboarding||[]).find(x=>x.id===b.dataset.copiar); if(!d) return;
+      try{ await navigator.clipboard.writeText(d.texto||''); b.textContent='Copiado'; }catch(e){ ABERTO=d.id; render(); }
+    });
+    app.querySelectorAll('[data-apagar]').forEach(b=>b.onclick=async()=>{
+      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; }
+      b.disabled=true; try{ await DB.collection('onboarding').doc(b.dataset.apagar).delete(); }catch(e){ ERRO='Não consegui apagar agora.'; render(); }
+    });
+    // códigos
+    $('cCriar').onclick = async()=>{
+      const nome=$('cNome').value.trim(); let cod=$('cCod').value.trim().toUpperCase();
+      if(!nome){ setCMsg('Escreva o nome do cliente.',true); $('cNome').blur(); render(); return; }
+      if(!cod) cod=gerarCodigo(nome);
+      if(AC.norm(cod).length<6){ setCMsg('O código precisa ter pelo menos 6 letras ou números.',true); $('cCod').blur(); render(); return; }
+      if(codigoRepetido(cod)){ setCMsg('Esse código já existe. Escolha outro.',true); $('cCod').blur(); render(); return; }
+      $('cCriar').disabled=true;
+      try{ await DB.collection('codigos').add({codigo:cod,nome,ativo:true,criadoEm:Date.now()}); setCMsg(`Código ${cod} criado para ${nome}. Use "Copiar mensagem" para mandar ao cliente.`); }
+      catch(e){ setCMsg('Não consegui criar agora. Tente de novo.',true); }
+      document.activeElement&&document.activeElement.blur(); render();
+    };
+    app.querySelectorAll('[data-cmsg]').forEach(b=>b.onclick=async()=>{ const c=achaCodigo(b.dataset.cmsg); if(!c) return;
+      try{ await navigator.clipboard.writeText(mensagem(c)); b.textContent='Copiado'; setTimeout(()=>b.textContent='Copiar mensagem',1500); }catch(e){ setCMsg(mensagem(c)); render(); } });
+    app.querySelectorAll('[data-cedit]').forEach(b=>b.onclick=()=>{ EDIT=b.dataset.cedit; setCMsg(''); render(); });
+    app.querySelectorAll('[data-ccancel]').forEach(b=>b.onclick=()=>{ EDIT=null; render(); });
+    app.querySelectorAll('[data-csalvar]').forEach(b=>b.onclick=async()=>{
+      const id=b.dataset.csalvar, nome=$('eNome').value.trim(), cod=$('eCod').value.trim().toUpperCase();
+      document.activeElement&&document.activeElement.blur();
+      if(!nome || AC.norm(cod).length<6){ setCMsg('Preencha o nome e um código com pelo menos 6 letras ou números.',true); render(); return; }
+      if(codigoRepetido(cod,id)){ setCMsg('Esse código já existe. Escolha outro.',true); render(); return; }
+      b.disabled=true;
+      try{ await DB.collection('codigos').doc(id).update({nome,codigo:cod}); EDIT=null; setCMsg('Código atualizado. O código antigo parou de funcionar.'); }
+      catch(e){ setCMsg('Não consegui salvar agora.',true); }
+      render();
+    });
+    app.querySelectorAll('[data-cativo]').forEach(b=>b.onclick=async()=>{ const c=achaCodigo(b.dataset.cativo); if(!c) return; b.disabled=true;
+      try{ await DB.collection('codigos').doc(c.id).update({ativo:c.ativo===false}); setCMsg(c.ativo===false?`Código ${c.codigo} ativado.`:`Código ${c.codigo} desativado: não entra mais nas ferramentas.`); }
+      catch(e){ setCMsg('Não consegui alterar agora.',true); } render(); });
+    app.querySelectorAll('[data-capagar]').forEach(b=>b.onclick=async()=>{
+      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; }
+      b.disabled=true; try{ await DB.collection('codigos').doc(b.dataset.capagar).delete(); setCMsg('Código apagado.'); }catch(e){ setCMsg('Não consegui apagar agora.',true); } render();
+    });
+  }
+
+  function assinar(){
+    Object.keys(DADOS).forEach(col=>{
+      DB.collection(col).onSnapshot(s=>{
+        DADOS[col]=s.docs.map(d=>Object.assign({},d.data(),{id:d.id}));
+        ERRO=''; tratarLink(); render();
+      }, ()=>{ if(DADOS[col]===null) DADOS[col]=[]; ERRO='Não consegui carregar tudo. Confira se você entrou com o e-mail do dono (o mesmo do schema.sql).'; render(); });
+    });
+  }
+  // Link do e-mail: painel/#abrir=<coleção>:<id>
+  function tratarLink(){
+    const m=/^#abrir=(onboarding|diagnosticos|envios):(.+)$/.exec(location.hash||''); if(!m) return;
+    if(m[1]==='onboarding' && DADOS.onboarding===null) return;
+    history.replaceState(null,'',location.pathname);
+    abrir(m[1], decodeURIComponent(m[2]));
+  }
+  (async()=>{
+    if(A && A.configurado){
+      SESSAO=await A.sessao();
+      if(SESSAO){ DB=await window.claude.use('db'); assinar(); }
+    }
+    if(location.hash==='#codigos') FOCO='codigos';
+    render();
+  })();
+})();
+</script>
+</body>
+</html>

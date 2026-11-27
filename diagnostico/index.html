@@ -1,0 +1,1405 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.acc{max-width:540px;margin:24px auto 0;width:100%}
+.acc h1{font-size:clamp(24px,4vw,32px)}
+.codrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:12px;align-items:end}
+@media (max-width:640px){.codrow{grid-template-columns:1fr}}
+.codetag{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;font-weight:500;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:6px;padding:1px 7px;margin-right:8px;letter-spacing:.04em}
+</style></head><body>
+<title>Diagnóstico IA Sinapsy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap">
+<style>
+/* Layout: one narrow column of steps under a sticky progress bar; the result widens to matrix + quadrant lists. Dark-only, matching the SinapsyIA brand. */
+:root{
+  --bg:#0B1020; --surface:#11182F; --surface-2:#18213F; --line:rgba(160,170,230,.16); --line-strong:rgba(160,170,230,.32);
+  --fg:#E9ECFB; --muted:#9BA3C6; --faint:#6B739A;
+  --violet:#8B5CF6; --violet-deep:#7C3AED; --cyan:#22D3EE;
+  --int:#34D399; --ext:#FB923C; --warn:#FBBF24; --danger:#F87171;
+  --q-win:#22D3EE; --q-moon:#A78BFA; --q-fill:#8B93B8; --q-avoid:#F59E0B;
+  --grad:linear-gradient(135deg,#7C3AED 0%,#06B6D4 100%);
+  --display:'Poppins',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --body:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --r:14px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto}
+.wrap.wide{max-width:1080px}
+h1,h2,h3{font-family:var(--display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:600}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);font-weight:600}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+.top-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:16px}
+.brand svg{flex:none}
+.steps{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.st{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px}
+.st b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;border:1px solid var(--line-strong);font-weight:600}
+.st.on{color:var(--fg)} .st.on b{background:var(--grad);border-color:transparent;color:#fff}
+.st.done b{background:var(--surface-2);color:var(--cyan);border-color:var(--cyan)}
+.st + .st::before{content:"";width:14px;height:1px;background:var(--line-strong);margin-right:2px}
+.mode{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid var(--line-strong);color:var(--muted)}
+.mode.ia{border-color:rgba(34,211,238,.5);color:var(--cyan)}
+
+main{padding-top:36px;display:flex;flex-direction:column;gap:28px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.notice{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.07);color:#FDE68A;border-radius:10px;padding:10px 14px;font-size:13.5px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:14px;padding-top:8px}
+.hero p.lead{font-size:17px;color:var(--muted);max-width:60ch}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px;padding:0;list-style:none;counter-reset:how}
+.how li{counter-increment:how;border-top:1px solid var(--line-strong);padding-top:10px;font-size:13.5px;color:var(--muted)}
+.how li::before{content:counter(how);display:block;font-family:var(--display);font-weight:600;color:var(--fg);font-size:14px;margin-bottom:2px}
+.how li strong{color:var(--fg);font-weight:600}
+@media (max-width:620px){.how{grid-template-columns:1fr}}
+
+/* forms */
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:500}
+input[type=text],select,textarea,input[type=number]{background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;padding:11px 12px;width:100%;min-width:0}
+textarea{min-height:110px;resize:vertical;line-height:1.5}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);outline:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.btn{border:0;border-radius:10px;padding:12px 20px;font-weight:600;cursor:pointer;background:var(--grad);color:#fff;font-family:var(--display);font-size:14.5px;letter-spacing:.01em}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid var(--line-strong);color:var(--fg);font-family:var(--body);font-weight:500}
+.btn.ghost:hover{border-color:var(--muted)}
+.btn.sm{padding:8px 12px;font-size:13px}
+.linkbtn{background:none;border:0;color:var(--cyan);cursor:pointer;padding:0;font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:4px}
+.err{color:var(--danger);font-size:13px}
+
+/* busy */
+.busy{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.busy small{display:block;color:var(--faint);font-size:12.5px}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--cyan);animation:sp 0.9s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+
+/* summary quote */
+.reading{border-left:3px solid var(--violet);padding:4px 0 4px 14px;font-size:16px}
+
+/* chips */
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.chip{display:flex;flex-direction:column;gap:2px;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--bg);cursor:pointer}
+.chip .n{font-weight:600}
+.chip .d{font-size:12.5px;color:var(--muted)}
+.chip[aria-pressed=true]{border-color:var(--cyan);background:rgba(34,211,238,.08);box-shadow:inset 0 0 0 1px var(--cyan)}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.addrow{display:flex;gap:8px}
+.addrow input{flex:1}
+
+/* checklist */
+.checks{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;background:var(--bg)}
+.checks label:last-child{border-bottom:0}
+.checks input{margin-top:3px;accent-color:var(--cyan);width:17px;height:17px;flex:none}
+.checks label.off span{color:var(--faint);text-decoration:line-through}
+
+/* classification rows */
+.tasks{display:flex;flex-direction:column;gap:10px}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;padding:14px 16px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.trow .name{font-weight:600}
+.trow .lev{grid-column:1/-1;color:var(--muted);font-size:13.5px}
+.trow .scores{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.score{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.score input{width:64px;padding:7px 8px;text-align:center;font-variant-numeric:tabular-nums;font-size:15px}
+.score select{padding:7px 8px;width:auto}
+.x{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px;line-height:1}
+.x:hover{color:var(--danger);border-color:var(--danger)}
+@media (max-width:560px){.trow{grid-template-columns:1fr}}
+
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.tag.I{color:var(--int);background:rgba(52,211,153,.12)}
+.tag.E{color:var(--ext);background:rgba(251,146,60,.12)}
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line-strong);color:var(--muted);white-space:nowrap}
+
+/* result */
+.res-head{display:flex;flex-direction:column;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{padding:16px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.stat .v{font-family:var(--display);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .l{font-size:12.5px;color:var(--muted)}
+.stat.win .v{color:var(--q-win)} .stat.moon .v{color:var(--q-moon)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.matrix-wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.matrix-wrap{grid-template-columns:1fr}}
+.matrix{width:100%;height:auto;display:block}
+.matrix text{font-family:var(--body)}
+.dot{cursor:pointer}
+.dot circle.c{stroke:var(--bg);stroke-width:2}
+.dot.sel circle.ring{stroke:var(--fg);stroke-width:2;fill:none}
+.dot:focus{outline:none}
+.dot:focus-visible circle.ring{stroke:var(--cyan);stroke-width:3}
+.legend{display:flex;gap:16px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.detail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+.detail .q{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.detail .lev{font-size:16px;line-height:1.5;border-left:3px solid var(--cyan);padding-left:12px}
+.kv{display:flex;gap:18px;font-variant-numeric:tabular-nums}
+.kv div{display:flex;flex-direction:column}
+.kv b{font-family:var(--display);font-size:22px}
+.kv span{font-size:11.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+
+.quads{display:flex;flex-direction:column;gap:16px}
+.quad{border-radius:var(--r);padding:20px;border:1px solid var(--line);background:var(--surface)}
+.quad header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.quad header p{font-size:13px;color:var(--muted)}
+.quad.win{border-color:rgba(34,211,238,.45);background:linear-gradient(180deg,rgba(34,211,238,.08),rgba(124,58,237,.05) 70%),var(--surface)}
+.quad.win h3{color:var(--q-win)}
+.quad.moon h3{color:var(--q-moon)}
+.quad.fill{background:transparent} .quad.fill h3{color:var(--q-fill)}
+.quad.avoid{background:transparent;border-style:dashed} .quad.avoid h3{color:var(--q-avoid)}
+.quad.fill .item,.quad.avoid .item{opacity:.85}
+.items{display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 12px;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0;padding-top:4px}
+.item .num{grid-row:1/3;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;color:#0B1020}
+.item .top-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.item .top-line .nm{font-weight:600}
+.item .top-line .sc{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.item .lv{color:var(--muted);font-size:14px}
+.quad.win .item .lv{color:var(--fg)}
+.empty{font-size:13.5px;color:var(--faint)}
+
+.reco{border-radius:18px;padding:28px;background:var(--grad);color:#fff;display:flex;flex-direction:column;gap:12px}
+.reco .eyebrow{color:rgba(255,255,255,.85)}
+.reco h2{font-size:clamp(24px,4vw,32px);font-weight:700}
+.reco p{max-width:65ch}
+.reco .lev{background:rgba(11,16,32,.35);border-radius:12px;padding:14px 16px;font-size:15.5px}
+
+.share textarea{min-height:160px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace}
+.handle{font-family:var(--display);font-weight:600;user-select:all}
+.saved{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.srow{display:flex;gap:10px;align-items:center;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);background:var(--bg)}
+.srow:last-child{border-bottom:0}
+.sopen{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:0;padding:4px 14px;cursor:pointer}
+.sopen .nm{font-weight:600;font-family:var(--display)}
+.sopen .meta{font-size:12.5px;color:var(--muted)}
+.sopen:hover .nm{color:var(--cyan)}
+.okmsg{color:var(--int);font-size:13.5px}
+.srow{flex-wrap:wrap;padding-left:0}
+.srow .sopen{flex:1 1 240px}
+.prop-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start}
+@media (max-width:900px){.prop-grid{grid-template-columns:1fr}}
+.pitems{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pitem{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg);align-items:start}
+.pitem:last-child{border-bottom:0}
+.pitem > input{margin-top:3px;width:17px;height:17px;accent-color:var(--cyan)}
+.pitem.off .pi-main,.pitem.off .pi-price{opacity:.5}
+.pi-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.pi-main .nm{font-weight:600}
+.pi-main .meta{font-size:12px;color:var(--muted)}
+.pi-side{grid-column:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pi-side select{width:auto;flex:1 1 200px;padding:7px 10px;font-size:13.5px}
+.pi-price{font-variant-numeric:tabular-nums;font-weight:600;min-width:80px;text-align:right}
+.qb{font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:1px 6px;border-radius:99px}
+.qb.win{color:var(--q-win);background:rgba(34,211,238,.12)} .qb.moon{color:var(--q-moon);background:rgba(167,139,250,.12)}
+.qb.fill{color:var(--q-fill);background:rgba(139,147,184,.12)} .qb.avoid{color:var(--q-avoid);background:rgba(245,158,11,.12)}
+.tog{display:flex;gap:10px;align-items:center;font-size:13.5px;cursor:pointer}
+.tog input{accent-color:var(--cyan);width:17px;height:17px}
+.ptot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ptot div{background:var(--surface-2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column}
+.ptot span{font-size:11.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.ptot b{font-family:var(--display);font-size:19px;font-variant-numeric:tabular-nums}
+.ptot small{font-size:11.5px;color:var(--muted)}
+@media (max-width:480px){.ptot{grid-template-columns:1fr}}
+.paper{background:#FFFFFF;color:#212538;border-radius:12px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35);font-size:13.5px;line-height:1.55}
+.paper .empty{padding:24px;color:#606680}
+.pp-head{background:#0B1020;color:#fff;padding:22px 26px 18px;border-bottom:4px solid;border-image:linear-gradient(90deg,#7C3AED,#06B6D4) 1}
+.pp-brand{font-size:11px;font-weight:700;letter-spacing:.14em;color:#22D3EE}
+.pp-head h2{color:#fff;font-size:22px;margin:4px 0}
+.pp-head p{color:#C8CDE6;font-size:12.5px}
+.pp-body{padding:20px 26px 24px;display:flex;flex-direction:column;gap:8px}
+.pp-body h3{font-family:var(--display);color:#0B1020;font-size:15px;margin-top:10px;padding-bottom:4px;border-bottom:2px solid #EDE9FE}
+.pp-soft{color:#606680;font-size:12.5px}
+.pp-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.pp-tw{overflow-x:auto}
+.pp-t{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.pp-t th{background:#7C3AED;color:#fff;text-align:left;padding:7px 9px;font-weight:600}
+.pp-t td{padding:7px 9px;border-bottom:1px solid #E6E6EF;vertical-align:top}
+.pp-t td:not(:first-child),.pp-t th:not(:first-child){text-align:right;white-space:nowrap}
+.pp-t td small{color:#606680}
+.pp-t tfoot td{background:#F0EDFF;font-weight:700;color:#0B1020}
+.pp-foot{margin-top:12px;padding-top:10px;border-top:1px solid #E6E6EF;color:#606680;font-size:12px}
+.svcs{display:flex;flex-direction:column;gap:12px}
+.svc{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.svc-top{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.svc-top .x{flex:none;margin-bottom:4px}
+.savedbar{border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.07);border-radius:10px;padding:10px 14px;font-size:13.5px}
+footer.foot{text-align:center;color:var(--faint);font-size:12.5px;padding-top:12px}
+</style>
+
+<div class="top"><div class="top-in" id="top"></div></div>
+<main id="app" class="wrap"></main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="../assets/logo-mark.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../ferramentas/config.js"></script>
+<script src="../ferramentas/sinapsy-runtime.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ---------- Catálogo usado no modo guiado (sem IA) ---------- */
+const CAT = {
+  'Marketing': {d:'Redes sociais, anúncios e conteúdo', t:[
+    ['Criar posts e carrosséis para redes sociais',6,2,'I','Claude gera textos e variações de posts a partir de um calendário de pautas; a equipe só revisa e agenda.'],
+    ['Escrever textos de anúncios',7,2,'I','IA gera dezenas de variações de copy por público e oferta para testar nos anúncios.'],
+    ['Planejar calendário de conteúdo',4,1,'I','IA monta o calendário do mês a partir dos temas, datas sazonais e objetivos do negócio.'],
+    ['Responder comentários e mensagens nas redes',6,6,'E','Agente responde as perguntas repetidas nas redes e passa para um humano os casos novos ou de venda.'],
+    ['Analisar resultados de campanhas',5,4,'I','Relatório semanal automático: os dados das plataformas entram e a IA escreve o que funcionou e o que ajustar.'],
+    ['Escrever roteiros de vídeo',5,2,'I','IA escreve a primeira versão do roteiro a partir do produto e do público; um humano ajusta o tom.']]},
+  'Vendas': {d:'Leads, propostas e fechamento', t:[
+    ['Qualificar os leads que chegam',9,6,'E','Agente no WhatsApp faz as perguntas de qualificação, pontua o lead e só passa para o vendedor quem tem perfil.'],
+    ['Montar orçamentos e propostas',8,4,'I','IA monta a proposta a partir de um modelo e das informações da conversa; o vendedor revisa e envia.'],
+    ['Fazer follow-up de leads parados',8,3,'I','Automação encontra os leads sem resposta e a IA escreve mensagens de retomada personalizadas para o vendedor disparar.'],
+    ['Atualizar o CRM',5,3,'I','IA resume cada conversa e preenche os campos do CRM sozinha, sem digitação do vendedor.'],
+    ['Preparar reuniões com clientes',4,2,'I','IA gera um resumo do cliente antes da reunião, com histórico, dores e próximos passos.'],
+    ['Atender pré-venda no site e no WhatsApp',8,8,'E','Agente tira dúvidas sobre produtos, preços e prazos 24h por dia e agenda a conversa com o vendedor.']]},
+  'Atendimento': {d:'Suporte e pós-venda', t:[
+    ['Responder dúvidas frequentes de clientes',7,5,'E','Agente treinado nas perguntas frequentes responde na hora e chama um humano no que não souber.'],
+    ['Abrir e organizar chamados',4,3,'I','IA lê a mensagem do cliente, classifica assunto e urgência e encaminha para a pessoa certa.'],
+    ['Informar status de pedidos e serviços',5,6,'E','Agente consulta o sistema e informa o status sem o cliente precisar esperar um atendente.'],
+    ['Tratar reclamações',6,8,'E','IA sugere a resposta e a solução com base em casos parecidos; o atendente decide e envia.'],
+    ['Analisar pesquisas de satisfação',3,2,'I','IA lê as respostas abertas e agrupa os principais motivos de elogio e reclamação.'],
+    ['Manter a base de respostas padrão',4,3,'I','IA transforma conversas já resolvidas em respostas padrão e artigos de ajuda.']]},
+  'Operações': {d:'Agenda, entrega e processos', t:[
+    ['Agendar e confirmar horários',7,4,'E','Agente agenda, confirma e remarca horários pelo WhatsApp, reduzindo faltas.'],
+    ['Escrever procedimentos internos',3,2,'I','IA escreve o procedimento a partir de um áudio ou vídeo explicando a tarefa.'],
+    ['Controlar estoque e compras',5,7,'I','IA cruza vendas e estoque e sugere o que comprar e quando, antes de faltar.'],
+    ['Preencher documentos e planilhas',6,3,'I','IA extrai dados de PDFs, fotos e e-mails e preenche planilhas e sistemas automaticamente.'],
+    ['Resumir reuniões internas',2,1,'I','Transcrição automática e resumo com decisões e responsáveis enviado ao time.'],
+    ['Acompanhar prazos de entrega',5,7,'I','Automação acompanha o prazo de cada entrega e a IA avisa o responsável e o cliente quando algo atrasa.']]},
+  'Financeiro': {d:'Cobrança, contas e caixa', t:[
+    ['Enviar cobranças e lembretes de pagamento',7,3,'I','Automação envia lembretes antes e depois do vencimento, com mensagens escritas pela IA para cada situação.'],
+    ['Conciliar pagamentos',5,6,'I','IA cruza o extrato bancário com as contas a receber e aponta só as divergências para revisão.'],
+    ['Fazer o relatório financeiro do mês',5,4,'I','Os dados do banco ou do sistema entram e a IA escreve a análise do mês em linguagem simples para o dono.'],
+    ['Lançar notas e despesas',4,4,'I','IA lê notas fiscais e comprovantes e lança cada despesa na categoria certa.'],
+    ['Negociar com clientes inadimplentes',6,8,'E','Agente conversa com o cliente em atraso e oferece opções de acordo dentro de regras definidas.'],
+    ['Projetar o fluxo de caixa',6,5,'I','IA projeta o caixa dos próximos meses a partir do histórico e avisa quando vai apertar.']]},
+  'RH e Pessoas': {d:'Contratação e equipe', t:[
+    ['Triar currículos',5,3,'I','IA lê os currículos, compara com o perfil da vaga e entrega um ranking com justificativa.'],
+    ['Escrever anúncios de vagas',2,1,'I','IA escreve a vaga a partir de poucos tópicos sobre função e requisitos.'],
+    ['Treinar novos funcionários',5,5,'I','Assistente interno responde as dúvidas do novo funcionário com base nos manuais da empresa.'],
+    ['Agendar entrevistas',3,4,'E','Agente combina horários com os candidatos e envia os lembretes.'],
+    ['Organizar avaliações de desempenho',3,6,'I','IA organiza as avaliações e escreve um resumo de pontos fortes e de melhoria de cada pessoa.'],
+    ['Responder dúvidas internas sobre férias e benefícios',3,4,'I','Assistente interno responde as dúvidas mais comuns sobre regras e benefícios.']]},
+  'Administrativo': {d:'E-mails, contratos e fornecedores', t:[
+    ['Responder e-mails',5,3,'I','IA classifica a caixa de entrada e escreve rascunhos das respostas para revisão.'],
+    ['Gerar contratos e documentos',6,4,'I','IA preenche o modelo de contrato com os dados do cliente e destaca as cláusulas que mudaram.'],
+    ['Organizar arquivos e pastas',1,2,'I','IA renomeia e organiza os documentos em pastas pelo conteúdo.'],
+    ['Comparar cotações de fornecedores',4,5,'I','IA compara cotações e resume prazos, preços e condições de cada fornecedor.'],
+    ['Preparar apresentações',3,2,'I','IA monta a estrutura e o texto dos slides a partir de um resumo do assunto.']]}
+};
+const DEPT_KEYS = [
+  [/market|conte[uú]do|tr[aá]fego|rede|social|divulga|comunica/i,'Marketing'],
+  [/vend|comercial|sdr|pr[eé]-?venda|neg[oó]cio/i,'Vendas'],
+  [/atend|suporte|sucesso|cs\b|p[oó]s-?venda|relacionamento|recep/i,'Atendimento'],
+  [/opera|entrega|log[ií]st|produ[cç][aã]o|agenda|estoque|servi[cç]o/i,'Operações'],
+  [/finan|cobran|cont[aá]b|fiscal/i,'Financeiro'],
+  [/\brh\b|pessoa|recrut|talento|equipe/i,'RH e Pessoas'],
+  [/admin|jur[ií]d|compras|fornecedor/i,'Administrativo']
+];
+const SEGMENTOS = ['Serviços para empresas (B2B)','Serviços para pessoas','Saúde / clínica','Comércio / loja física','E-commerce / loja online','Educação / cursos','Alimentação','Indústria','Imobiliário','Outro'];
+const PERMANENT = ['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
+const IG = 'https://ig.me/m/sinapsyia';
+
+/* ---------- Estado ---------- */
+const KEY = 'sinapsy-diagnostico-v1';
+function fresh(){return {step:'empresa',mode:null,empresa:{nome:'',segmento:'',descricao:''},resumo:'',deptOptions:[],depts:[],deptIdx:0,taskOptions:{},chosen:{},tasks:[],notice:'',sel:null,nextId:1,savedId:null,savedOrigem:'',savedData:'',prevStep:null};}
+function load(){try{const r=localStorage.getItem(KEY);if(!r)return null;const s=JSON.parse(r);return s&&s.step?Object.assign(fresh(),s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+let S = load() || fresh();
+let BUSY = null, CTL = null, FORM_ERR = '';
+
+/* ---------- Painel do dono (capabilities user + db) ---------- */
+let OWNER=false, OWNER_CHECKED=false, DB=null, DIAGS=null, DB_ERR='', IMPORT_TXT='', PANEL_MSG='', PANEL_ERR=false;
+(async()=>{
+  try{
+    if(!(window.claude && typeof window.claude.use==='function')) return;
+    const [user, db] = await Promise.all([window.claude.use('user').catch(()=>null), window.claude.use('db').catch(()=>null)]);
+    DB = db;
+    let own=false; if(user){ try{ own = !!(await Promise.resolve(user.isOwner())); }catch(e){} }
+    OWNER=own;
+    if(OWNER && DB){ subscribeDiags(); subscribeCfg(); subscribeCodigos(()=>{ if(S.step==='painel') render(); }); }
+    else await initAcesso();
+  } finally {
+    OWNER_CHECKED=true;
+    render();
+  }
+})();
+function subscribeDiags(){
+  const timer=setTimeout(()=>{ if(DIAGS===null){ DB_ERR='Ainda não consegui carregar os diagnósticos salvos. Verifique sua conexão.'; if(S.step==='painel') render(); } },10000);
+  DB.collection('diagnosticos').onSnapshot(snap=>{
+    if(!snap.metadata.fromCache){ clearTimeout(timer); DB_ERR=''; }
+    DIAGS = snap.docs.map(d=>Object.assign({}, d.data(), {id:d.id}));
+    // Link do painel: #abrir=diagnosticos:<id>
+    const m=/^#abrir=diagnosticos:(.+)$/.exec(location.hash||'');
+    if(m){ const d=DIAGS.find(x=>x.id===decodeURIComponent(m[1])); history.replaceState(null,'',location.pathname); if(d){ openSaved(d); return; } }
+    if(S.step==='painel') render();
+  }, ()=>{ clearTimeout(timer); DB_ERR='Não foi possível acessar os diagnósticos salvos.'; if(S.step==='painel') render(); });
+}
+function dbErr(e){
+  if(e && e.code==='quota_exceeded') return 'O espaço de armazenamento encheu. Apague diagnósticos antigos e tente de novo.';
+  return 'Não consegui salvar agora. Tente de novo em instantes.';
+}
+function b64enc(s){ return btoa(unescape(encodeURIComponent(s))); }
+function b64dec(s){ return decodeURIComponent(escape(atob(s))); }
+function packObj(){
+  return {v:1,e:[S.empresa.nome,S.empresa.segmento,S.empresa.descricao],r:S.resumo,d:S.depts,m:S.mode,
+    dt:new Date().toISOString().slice(0,10),t:S.tasks.map(t=>[t.nome,t.dept,t.impacto,t.esforco,t.tipo,t.alavanca]),a:ACC.hash||null};
+}
+function packCode(){ return 'SNPY1.'+b64enc(JSON.stringify(packObj()))+'.'; }
+function unpack(text){
+  const m=String(text||'').replace(/\s+/g,'').match(/SNPY1\.([A-Za-z0-9+/=]+)\./);
+  if(!m) return null;
+  try{ const p=JSON.parse(b64dec(m[1])); return (p && Array.isArray(p.e) && Array.isArray(p.t)) ? p : null; }catch(e){ return null; }
+}
+function docFromPayload(p, origem){
+  return {
+    empresa:str(p.e[0])||'Sem nome', segmento:str(p.e[1]), descricao:str(p.e[2]), resumo:str(p.r),
+    depts:(Array.isArray(p.d)?p.d:[]).map(x=>String(x)).slice(0,8), modo:p.m==='ia'?'ia':'guiado',
+    data:str(p.dt)||new Date().toISOString().slice(0,10), origem, criadoEm:Date.now(),
+    acesso:/^[A-Z0-9]{4,40}$/.test(str(p.a))?str(p.a):null,
+    tasks:p.t.slice(0,80).filter(Array.isArray).map(a=>({nome:str(a[0]),dept:str(a[1]),impacto:clamp(a[2]),esforco:clamp(a[3]),tipo:a[4]==='E'?'E':'I',alavanca:str(a[5])})).filter(t=>t.nome)
+  };
+}
+function fmtDate(d){ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(str(d.data)); return m?`${m[3]}/${m[2]}/${m[1]}`:''; }
+function openSaved(d){
+  if(d && d.novo && DB) DB.collection('diagnosticos').doc(d.id).update({novo:false}).catch(()=>{});
+  const n=fresh();
+  n.empresa={nome:str(d.empresa),segmento:str(d.segmento),descricao:str(d.descricao)};
+  n.resumo=str(d.resumo); n.mode=d.modo==='ia'?'ia':'guiado';
+  const depts=Array.isArray(d.depts)?d.depts.map(x=>String(x)):[];
+  (Array.isArray(d.tasks)?d.tasks:[]).forEach(t=>{
+    const dept=str(t.dept)||'Geral'; if(!depts.includes(dept)) depts.push(dept);
+    n.tasks.push({id:n.nextId++,dept,nome:str(t.nome),impacto:clamp(t.impacto),esforco:clamp(t.esforco),tipo:t.tipo==='E'?'E':'I',alavanca:str(t.alavanca)});
+  });
+  n.depts=depts;
+  depts.forEach(dp=>{ const names=n.tasks.filter(t=>t.dept===dp).map(t=>t.nome); n.taskOptions[dp]=names.slice(); n.chosen[dp]=names.slice(); });
+  n.deptIdx=Math.max(0,depts.length-1); n.step='resultado';
+  n.savedId=d.id; n.savedOrigem=str(d.origem); n.savedData=fmtDate(d); n.prevStep='painel';
+  S=n; save(); render(); window.scrollTo({top:0});
+}
+
+/* ---------- Preços e propostas (só o dono) ---------- */
+const DEFAULT_CFG = {
+  desconto:30, validadeDias:15,
+  pagamento:'50% na aprovação e 50% na entrega, por Pix ou boleto.',
+  contato:'Instagram @sinapsyia · sinapsyia.oficial@gmail.com',
+  servicos:[
+    {id:'diag',nome:'Diagnóstico aprofundado',impl:497,mensal:0,prazo:'1 semana',whatsapp:false,inclui:'Reunião de 1h com o dono, matriz impacto × esforço revisada e plano do que fazer primeiro. Valor abatido se o cliente fechar um projeto.'},
+    {id:'simples',nome:'Automação simples',impl:1200,mensal:150,prazo:'1 a 2 semanas',whatsapp:false,inclui:'Um fluxo interno, até 2 ferramentas conectadas, 1 rodada de ajustes e 30 min de treinamento da equipe.'},
+    {id:'inter',nome:'Automação intermediária',impl:2800,mensal:300,prazo:'2 a 4 semanas',whatsapp:false,inclui:'Fluxo com várias etapas e regras, até 4 ferramentas conectadas (CRM, planilhas, e-mail), 2 rodadas de ajustes e documentação.'},
+    {id:'avanc',nome:'Automação avançada',impl:5500,mensal:600,prazo:'4 a 8 semanas',whatsapp:false,inclui:'Processo com muitas regras, dados sensíveis ou integração com o sistema da empresa. Inclui fase de testes acompanhada.'},
+    {id:'atend',nome:'Agente de atendimento no WhatsApp',impl:3500,mensal:500,prazo:'3 a 5 semanas',whatsapp:true,inclui:'Agente treinado nas perguntas frequentes, chama um humano quando precisa e passa 30 dias em ajuste fino com conversas reais.'},
+    {id:'vendas',nome:'Agente de vendas (qualificação de leads)',impl:5000,mensal:700,prazo:'4 a 6 semanas',whatsapp:true,inclui:'Faz as perguntas de qualificação, agenda a reunião, registra o lead no CRM e passa 30 dias em ajuste fino.'},
+    {id:'ajustes',nome:'Pacote de ajustes (até 5 horas)',impl:600,mensal:0,prazo:'Sob demanda',whatsapp:false,inclui:'Banco de horas para novas funções ou mudanças nas soluções depois da entrega, além do que a mensalidade cobre.'}
+  ],
+  ferramentas:[
+    {nome:'API de IA (Claude ou similar)',valor:150,quando:'sempre',desc:'A inteligência por trás das soluções. Varia com o volume de uso.'},
+    {nome:'Servidor para o n8n',valor:60,quando:'sempre',desc:'Onde as automações rodam.'},
+    {nome:'API oficial do WhatsApp',valor:100,quando:'whatsapp',desc:'Cobrança da Meta por mensagens fora da janela de atendimento.'},
+    {nome:'Provedor da API do WhatsApp',valor:120,quando:'whatsapp',desc:'Empresa que conecta o número à API oficial.'}
+  ]
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+const num = (v,d) => { const n=Number(v); return isFinite(n)?n:d; };
+let CFG = clone(DEFAULT_CFG), CFG_EDIT = null, CFG_MSG = '', PROP = null;
+function normCfg(d){
+  const c=clone(DEFAULT_CFG); if(!d||typeof d!=='object') return c;
+  if(Array.isArray(d.servicos) && d.servicos.length) c.servicos=d.servicos.filter(s=>s&&typeof s==='object').map((s,i)=>({id:str(s.id)||('s'+i),nome:str(s.nome)||'Serviço',impl:Math.max(0,num(s.impl,0)),mensal:Math.max(0,num(s.mensal,0)),prazo:str(s.prazo),inclui:str(s.inclui),whatsapp:!!s.whatsapp}));
+  if(Array.isArray(d.ferramentas)) c.ferramentas=d.ferramentas.filter(f=>f&&typeof f==='object').map(f=>({nome:str(f.nome),valor:Math.max(0,num(f.valor,0)),quando:f.quando==='whatsapp'?'whatsapp':'sempre',desc:str(f.desc)}));
+  c.desconto=Math.min(100,Math.max(0,num(d.desconto,c.desconto)));
+  c.validadeDias=Math.max(1,Math.round(num(d.validadeDias,c.validadeDias)));
+  if(str(d.pagamento)) c.pagamento=str(d.pagamento);
+  if(str(d.contato)) c.contato=str(d.contato);
+  return c;
+}
+function subscribeCfg(){
+  DB.doc('config/precos').onSnapshot(s=>{
+    CFG = s.exists ? normCfg(s.data()) : clone(DEFAULT_CFG);
+    if(S.step==='proposta' && PROP) render();
+  }, ()=>{});
+}
+const money = n => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
+const svc = id => CFG.servicos.find(s=>s.id===id) || null;
+function suggestSvc(t){
+  let id;
+  if(t.tipo==='E') id = /vend|lead|qualif|comercial|sdr|pr[eé]-?venda|or[cç]amento/i.test(t.nome+' '+t.dept) ? 'vendas' : 'atend';
+  else id = t.esforco<=3 ? 'simples' : t.esforco<=6 ? 'inter' : 'avanc';
+  return svc(id) ? id : (CFG.servicos[0] && CFG.servicos[0].id);
+}
+function openProposta(d){
+  const tasks=(Array.isArray(d.tasks)?d.tasks:[]).map(t=>({nome:str(t.nome),dept:str(t.dept),impacto:clamp(t.impacto),esforco:clamp(t.esforco),tipo:t.tipo==='E'?'E':'I',alavanca:str(t.alavanca)})).filter(t=>t.nome);
+  const ord={win:0,moon:1,fill:2,avoid:3};
+  tasks.sort((a,b)=>ord[quad(a)]-ord[quad(b)] || score(b)-score(a));
+  const saved = d.proposta && typeof d.proposta==='object' ? d.proposta : null;
+  let itens;
+  if(saved && Array.isArray(saved.itens)) itens = saved.itens.filter(i=>i&&typeof i==='object').map(i=>({task:i.task?str(i.task):null,servico:str(i.servico),on:!!i.on}));
+  else {
+    const anyWin = tasks.some(t=>quad(t)==='win');
+    itens = tasks.map((t,j)=>({task:t.nome,servico:suggestSvc(t),on:anyWin?quad(t)==='win':j===0}));
+  }
+  PROP = {diagId:d.id, diag:d, tasks, cliente:str(saved&&saved.cliente)||str(d.empresa), desconto:saved?saved.desconto!==false:true, itens};
+  S.step='proposta'; save(); render(); window.scrollTo({top:0});
+}
+const taskOf = name => PROP.tasks.find(t=>t.nome===name) || null;
+function propModel(){
+  const lines = PROP.itens.filter(i=>i.on).map(i=>({i, s:svc(i.servico), t:i.task?taskOf(i.task):null})).filter(l=>l.s);
+  const d = 0, useD = false;
+  const impl = lines.reduce((a,l)=>a+l.s.impl,0), implD = useD ? impl*(1-d) : impl, mensal = lines.reduce((a,l)=>a+l.s.mensal,0);
+  let wmin=0, wmax=0, ok=false;
+  lines.forEach(l=>{ const m=/(\d+)\s*(?:a|-|até)\s*(\d+)\s*semana/i.exec(l.s.prazo) || /(\d+)\s*semana/i.exec(l.s.prazo); if(m){ ok=true; wmin+=+m[1]; wmax+=+(m[2]||m[1]); } });
+  const wa = lines.some(l=>l.s.whatsapp);
+  const ferr = lines.length ? CFG.ferramentas.filter(f=>f.quando==='sempre' || wa) : [];
+  const ferrTot = ferr.reduce((a,f)=>a+f.valor,0);
+  const cliente = PROP.cliente.trim() || '[nome do cliente]';
+  const n = lines.length, dd = fmtDate(PROP.diag);
+  const objetivo = `Esta proposta é para ${cliente}. Ela coloca em prática ${n===1?'a solução de IA escolhida':'as '+n+' soluções de IA escolhidas'} a partir do diagnóstico${dd?' de '+dd:''}, por ${money(implD)} de implantação${useD?' (com o desconto de lançamento)':''}${mensal?' e '+money(mensal)+' por mês':''}.`;
+  const etapas = ['Reunião de início (semana 1): alinhamos o processo de cada tarefa e você libera os acessos às ferramentas.']
+    .concat(lines.map(l=>`${l.s.nome} (${l.s.prazo||'prazo a combinar'})${l.t?': '+l.t.nome:''}.`))
+    .concat([mensal ? 'Depois da entrega: começa a mensalidade, que cobre monitoramento, correções e pequenos ajustes.' : 'Depois da entrega: acompanhamos os primeiros dias de uso.']);
+  const condicoes = [`Pagamento da implantação (${money(implD)}): ${CFG.pagamento}`]
+    .concat(mensal ? [`Mensalidade: ${money(mensal)}, a partir da entrega da primeira solução.`] : [])
+    .concat([`Validade da proposta: ${CFG.validadeDias} dias.`, 'Não está incluso: os custos de ferramentas e pedidos fora do que está descrito em "O que vamos entregar". Esses pedidos ganham um orçamento à parte.']);
+  const passos = ['Você aprova a proposta respondendo a nossa mensagem.','Enviamos o link de pagamento da primeira parcela.','Marcamos a reunião de início.'];
+  return {cliente, data:new Date().toLocaleDateString('pt-BR'), objetivo, contexto:str(PROP.diag.resumo), lines, useD, impl, implD, mensal,
+    prazo: ok ? (wmin===wmax ? wmin+' semanas' : wmin+' a '+wmax+' semanas') : '', etapas, ferr, ferrTot, condicoes, passos};
+}
+function paperHtml(m){
+  if(!m.lines.length) return '<p class="empty">Marque pelo menos um item à esquerda para montar a proposta.</p>';
+  const dpct = CFG.desconto;
+  return `
+  <header class="pp-head"><span class="pp-brand">SINAPSYIA</span><h2>Proposta de automação com IA</h2><p>Para ${esc(m.cliente)} · ${esc(m.data)} · válida por ${CFG.validadeDias} dias</p></header>
+  <div class="pp-body">
+    <h3>Objetivo</h3><p>${esc(m.objetivo)}</p>${m.contexto?`<p class="pp-soft">Ponto de partida: ${esc(m.contexto)}</p>`:''}
+    <h3>O que vamos entregar</h3>
+    <ol class="pp-list">${m.lines.map(l=>`<li><strong>${esc(l.s.nome)}</strong>${l.t?` · ${esc(l.t.nome)}`:''}${l.t&&l.t.alavanca?`<br><span>Como a IA entra: ${esc(l.t.alavanca)}</span>`:''}${l.s.inclui?`<br><span class="pp-soft">Inclui: ${esc(l.s.inclui)}</span>`:''}</li>`).join('')}</ol>
+    <h3>Investimento</h3>
+    <div class="pp-tw"><table class="pp-t"><thead><tr><th>Serviço</th><th>Implantação</th>${m.useD?'<th>Com desconto</th>':''}<th>Mensalidade</th></tr></thead>
+    <tbody>${m.lines.map(l=>`<tr><td>${esc(l.s.nome)}${l.t?`<br><small>${esc(l.t.nome)}</small>`:''}</td><td>${money(l.s.impl)}</td>${m.useD?`<td>${money(l.s.impl*(1-dpct/100))}</td>`:''}<td>${l.s.mensal?money(l.s.mensal):'-'}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Total</td><td>${money(m.impl)}</td>${m.useD?`<td>${money(m.implD)}</td>`:''}<td>${m.mensal?money(m.mensal)+'/mês':'-'}</td></tr></tfoot></table></div>
+    ${m.useD?`<p class="pp-soft">Desconto de lançamento de ${dpct}% sobre a implantação, válido para os primeiros clientes da SinapsyIA.</p>`:''}
+    <h3>Prazos e etapas</h3>${m.prazo?`<p>As soluções ficam prontas em ${esc(m.prazo)} a partir do início, uma depois da outra.</p>`:''}
+    <ol class="pp-list">${m.etapas.map(e=>`<li>${esc(e)}</li>`).join('')}</ol>
+    ${m.ferr.length?`<h3>Custos de ferramentas</h3><p>As ferramentas custam em torno de ${money(m.ferrTot)} por mês e são pagas pela sua empresa direto ao fornecedor, separadas do nosso serviço. Os valores são estimativas e serão confirmados na reunião de início.</p>
+      <div class="pp-tw"><table class="pp-t"><thead><tr><th>Ferramenta</th><th>Por mês</th><th>Para que serve</th></tr></thead><tbody>${m.ferr.map(f=>`<tr><td>${esc(f.nome)}</td><td>${money(f.valor)}</td><td>${esc(f.desc)}</td></tr>`).join('')}</tbody></table></div>`:''}
+    <h3>Condições</h3><ul class="pp-list">${m.condicoes.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>
+    <h3>Próximos passos</h3><ol class="pp-list">${m.passos.map(p=>`<li>${esc(p)}</li>`).join('')}</ol>
+    <p class="pp-foot">SinapsyIA · ${esc(CFG.contato)}</p>
+  </div>`;
+}
+function propText(m){
+  let o=`PROPOSTA DE AUTOMAÇÃO COM IA · SINAPSYIA\nPara ${m.cliente} · ${m.data} · válida por ${CFG.validadeDias} dias\n\nOBJETIVO\n${m.objetivo}\n\nO QUE VAMOS ENTREGAR\n`;
+  m.lines.forEach((l,i)=>{ o+=`${i+1}. ${l.s.nome}${l.t?' · '+l.t.nome:''}\n`; if(l.t&&l.t.alavanca) o+=`   Como a IA entra: ${l.t.alavanca}\n`; if(l.s.inclui) o+=`   Inclui: ${l.s.inclui}\n`; });
+  o+=`\nINVESTIMENTO\n`; m.lines.forEach(l=>{ o+=`- ${l.s.nome}: ${money(l.s.impl)}${m.useD?' (com desconto: '+money(l.s.impl*(1-CFG.desconto/100))+')':''}${l.s.mensal?' + '+money(l.s.mensal)+'/mês':''}\n`; });
+  o+=`Total: ${money(m.implD)} de implantação${m.useD?' com o desconto de lançamento (sem desconto: '+money(m.impl)+')':''}${m.mensal?' + '+money(m.mensal)+'/mês':''}\n`;
+  o+=`\nPRAZOS E ETAPAS\n${m.prazo?'As soluções ficam prontas em '+m.prazo+' a partir do início.\n':''}${m.etapas.map((e,i)=>`${i+1}. ${e}`).join('\n')}\n`;
+  if(m.ferr.length) o+=`\nCUSTOS DE FERRAMENTAS (pagos pela sua empresa, estimativa)\n${m.ferr.map(f=>`- ${f.nome}: ${money(f.valor)}/mês`).join('\n')}\n`;
+  o+=`\nCONDIÇÕES\n${m.condicoes.map(c=>'- '+c).join('\n')}\n\nPRÓXIMOS PASSOS\n${m.passos.map((p,i)=>`${i+1}. ${p}`).join('\n')}\n\nSinapsyIA · ${CFG.contato}\n`;
+  return o;
+}
+function pdfSafe(s){
+  return String(s==null?'':s).replace(/[–—−]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/…/g,'...').replace(/→/g,'->').replace(/[^\x00-\xFF]/g,'');
+}
+function buildPdf(m){
+  const J = window.jspdf && window.jspdf.jsPDF;
+  if(!J) throw new Error('nolib');
+  const doc = new J({unit:'mm', format:'a4'});
+  if(typeof doc.autoTable!=='function') throw new Error('nolib');
+  const W=210, M=18, BOT=278, ink=[33,37,56], soft=[96,102,128], violet=[124,58,237], navy=[11,16,32];
+  let y=0;
+  const ensure = h => { if(y+h>BOT){ doc.addPage(); y=20; } };
+  const txt = (t,size,style,color,indent) => {
+    doc.setFont('helvetica', style||'normal'); doc.setFontSize(size); doc.setTextColor(...(color||ink));
+    const lh=size*0.45, ind=indent||0;
+    doc.splitTextToSize(pdfSafe(t), W-2*M-ind).forEach(l=>{ ensure(lh+1); doc.text(l, M+ind, y); y+=lh; });
+  };
+  const h2 = t => { y+=5; ensure(18); doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...navy); doc.text(pdfSafe(t),M,y); y+=2.2; doc.setDrawColor(...violet); doc.setLineWidth(0.7); doc.line(M,y,M+14,y); y+=6.5; };
+  const tstyle = {font:'helvetica',fontSize:9.5,cellPadding:2.6,textColor:ink,lineColor:[225,225,238],lineWidth:0.2,valign:'middle'};
+  doc.setFillColor(...navy); doc.rect(0,0,W,42,'F');
+  doc.setFillColor(...violet); doc.rect(0,42,W/2,1.6,'F'); doc.setFillColor(6,182,212); doc.rect(W/2,42,W/2,1.6,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('SINAPSYIA',M,15);
+  doc.setFontSize(21); doc.text(pdfSafe('Proposta de automação com IA'),M,27);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(200,205,230);
+  doc.text(pdfSafe(`Para ${m.cliente}  ·  ${m.data}  ·  válida por ${CFG.validadeDias} dias`),M,35);
+  y=54;
+  h2('Objetivo'); txt(m.objetivo,10.5); if(m.contexto){ y+=2; txt('Ponto de partida: '+m.contexto,10,'normal',soft); }
+  h2('O que vamos entregar');
+  m.lines.forEach((l,i)=>{ ensure(16); txt(`${i+1}. ${l.s.nome}${l.t?'  ·  '+l.t.nome:''}`,11,'bold'); y+=0.6;
+    if(l.t&&l.t.alavanca) txt('Como a IA entra: '+l.t.alavanca,10,'normal',ink,4.5);
+    if(l.s.inclui) txt('Inclui: '+l.s.inclui,10,'normal',soft,4.5); y+=3; });
+  if(m.mensal) txt('A mensalidade cobre monitoramento, correções e pequenos ajustes nas soluções entregues.',9.5,'italic',soft);
+  h2('Investimento');
+  const head=['Serviço','Implantação']; if(m.useD) head.push('Com desconto'); head.push('Mensalidade');
+  const body=m.lines.map(l=>{ const r=[pdfSafe(l.s.nome+(l.t?'\n'+l.t.nome:'')), money(l.s.impl)]; if(m.useD) r.push(money(l.s.impl*(1-CFG.desconto/100))); r.push(l.s.mensal?money(l.s.mensal):'-'); return r; });
+  const foot=['Total', money(m.impl)]; if(m.useD) foot.push(money(m.implD)); foot.push(m.mensal?money(m.mensal)+'/mês':'-');
+  ensure(30);
+  doc.autoTable({startY:y, head:[head], body, foot:[foot], margin:{left:M,right:M,bottom:22}, theme:'grid', styles:tstyle,
+    headStyles:{fillColor:violet,textColor:255,fontStyle:'bold'}, footStyles:{fillColor:[240,237,255],textColor:navy,fontStyle:'bold'},
+    columnStyles:{0:{cellWidth:'auto'},1:{halign:'right',cellWidth:30},2:{halign:'right',cellWidth:32},3:{halign:'right',cellWidth:32}}, showFoot:'lastPage'});
+  y=doc.lastAutoTable.finalY+5;
+  if(m.useD) txt(`Desconto de lançamento de ${CFG.desconto}% sobre a implantação, válido para os primeiros clientes da SinapsyIA.`,9.5,'normal',soft);
+  h2('Prazos e etapas');
+  if(m.prazo){ txt(`As soluções ficam prontas em ${m.prazo} a partir do início, uma depois da outra.`,10.5); y+=1.5; }
+  m.etapas.forEach((e,i)=>{ txt(`${i+1}. ${e}`,10,'normal',ink,2); y+=1.2; });
+  if(m.ferr.length){
+    h2('Custos de ferramentas');
+    txt(`As ferramentas custam em torno de ${money(m.ferrTot)} por mês e são pagas pela sua empresa direto ao fornecedor, separadas do nosso serviço. Os valores são estimativas e serão confirmados na reunião de início.`,10.5);
+    y+=2; ensure(24);
+    doc.autoTable({startY:y, head:[['Ferramenta','Por mês','Para que serve']], body:m.ferr.map(f=>[pdfSafe(f.nome),money(f.valor),pdfSafe(f.desc)]), margin:{left:M,right:M,bottom:22}, theme:'grid', styles:tstyle,
+      headStyles:{fillColor:[60,66,96],textColor:255,fontStyle:'bold'}, columnStyles:{0:{cellWidth:55},1:{halign:'right',cellWidth:24}}});
+    y=doc.lastAutoTable.finalY+3;
+  }
+  h2('Condições'); m.condicoes.forEach(c=>{ txt('- '+c,10,'normal',ink,2); y+=1.2; });
+  h2('Próximos passos'); m.passos.forEach((p,i)=>{ txt(`${i+1}. ${p}`,10,'normal',ink,2); y+=1.2; });
+  const n=doc.getNumberOfPages();
+  for(let p=1;p<=n;p++){ doc.setPage(p); doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...soft);
+    doc.text(pdfSafe('SinapsyIA  ·  '+CFG.contato),M,289); doc.text(`${p}/${n}`,W-M,289,{align:'right'}); }
+  return doc.output('blob');
+}
+function propMsg(t){ const el=document.getElementById('pmsg'); if(el) el.textContent=t; }
+async function saveProp(silent){
+  if(!PROP||!DB) return false;
+  try{
+    const data={cliente:PROP.cliente, desconto:PROP.desconto, itens:PROP.itens.map(i=>({task:i.task,servico:i.servico,on:i.on})), atualizadaEm:Date.now()};
+    await DB.collection('diagnosticos').doc(PROP.diagId).update({proposta:data});
+    PROP.diag.proposta=data;
+    if(!silent) propMsg('Proposta salva no painel.');
+    return true;
+  }catch(e){ propMsg(dbErr(e)); return false; }
+}
+async function downloadPdf(){
+  const m=propModel();
+  if(!m.lines.length){ propMsg('Marque pelo menos um item antes de baixar.'); return; }
+  let blob;
+  try{ blob=buildPdf(m); }catch(e){ propMsg('Não consegui montar o PDF agora. Use "Copiar texto" enquanto isso.'); return; }
+  const dl = (window.claude && typeof window.claude.use==='function') ? await window.claude.use('downloads').catch(()=>null) : null;
+  if(!dl){ propMsg('Baixar arquivos não está disponível nesta visualização. Use "Copiar texto".'); return; }
+  const nome=('Proposta Sinapsy - '+m.cliente).replace(/[\\/:*?"<>|\[\]]+/g,'').replace(/\s+/g,' ').trim().slice(0,120)+'.pdf';
+  saveProp(true);
+  try{ await dl.save({filename:nome, data:blob}); propMsg('PDF salvo. Confira a pasta de downloads.'); }
+  catch(e){ if(e&&e.code==='declined') propMsg('Download cancelado.'); else if(e&&e.code==='rate_limited') propMsg('Já tem uma confirmação de download aberta. Responda ela e tente de novo.'); else propMsg('Não consegui baixar o PDF agora. Use "Copiar texto".'); }
+}
+function copyProp(){
+  const txt=propText(propModel()), box=document.getElementById('ptext');
+  const fallback=()=>{ box.value=txt; box.hidden=false; box.focus(); box.select(); propMsg('Selecionei o texto abaixo: copie com Ctrl+C.'); };
+  try{ navigator.clipboard.writeText(txt).then(()=>propMsg('Texto copiado. Cole no WhatsApp ou no e-mail.'),fallback); }catch(e){ fallback(); }
+}
+function goPrecos(){ CFG_EDIT=clone(CFG); CFG_MSG=''; S.step='precos'; save(); render(); window.scrollTo({top:0}); }
+function setPath(o,path,v){ const k=path.split('.'); let c=o; for(let i=0;i<k.length-1;i++) c=c[k[i]]; c[k[k.length-1]]=v; }
+
+function vProposta(){
+  const m=propModel();
+  const opts = sel => CFG.servicos.map(s=>`<option value="${esc(s.id)}" ${s.id===sel?'selected':''}>${esc(s.nome)}</option>`).join('');
+  const rows = PROP.itens.map((i,k)=>{
+    const t=i.task?taskOf(i.task):null, s=svc(i.servico), q=t?quad(t):null;
+    return `<div class="pitem ${i.on?'':'off'}">
+      <input type="checkbox" id="pi-${k}" data-pi="${k}" ${i.on?'checked':''} aria-label="Incluir na proposta">
+      <div class="pi-main"><span class="nm">${esc(i.task||'Serviço avulso')}</span>${t?`<span class="meta"><span class="qb ${q}">${QUADS[q].ico} ${QUADS[q].t}</span> ${esc(t.dept)} · I ${t.impacto} · E ${t.esforco} · ${t.tipo==='E'?'Externo':'Interno'}</span>`:''}</div>
+      <div class="pi-side"><select id="ps-${k}" data-ps="${k}" aria-label="Serviço">${opts(i.servico)}</select><span class="pi-price">${s?money(s.impl):''}</span>${i.task?'':`<button class="x" data-prm="${k}" aria-label="Remover">×</button>`}</div>
+    </div>`;
+  }).join('');
+  return `
+  <section class="stack">
+    <span class="eyebrow">Proposta · só você vê</span>
+    <h1>Proposta para ${esc(PROP.cliente||'o cliente')}</h1>
+    <p class="muted">Marque o que entra e escolha o serviço de cada tarefa. A sugestão vem da nota de esforço e do tipo da tarefa. A proposta ao lado muda na hora.</p>
+  </section>
+  <div class="prop-grid">
+    <section class="card stack">
+      <label class="f">Nome do cliente na proposta<input type="text" id="pcli" value="${esc(PROP.cliente)}"></label>
+      <div class="pitems">${rows || '<p class="empty">Este diagnóstico não tem tarefas.</p>'}</div>
+      <div class="addrow"><select id="addsvc" aria-label="Serviço avulso">${opts('')}</select><button class="btn ghost sm" id="addsvcbtn">Adicionar avulso</button></div>
+      <div class="ptot">
+        <div><span>Implantação</span><b>${money(m.implD)}</b>${m.useD?`<small>sem desconto ${money(m.impl)}</small>`:''}</div>
+        <div><span>Mensalidade</span><b>${money(m.mensal)}</b></div>
+        <div><span>Prazo</span><b>${esc(m.prazo||'-')}</b></div>
+      </div>
+      <div class="row"><button class="btn" id="ppdf">Baixar PDF</button><button class="btn ghost" id="pcopy">Copiar texto</button><button class="btn ghost" id="psave">Salvar</button></div>
+      <p id="pmsg" class="muted" role="status" style="font-size:13px"></p>
+      <textarea id="ptext" readonly hidden aria-label="Texto da proposta" style="min-height:180px;font-size:12.5px"></textarea>
+    </section>
+    <article class="paper" id="paper" aria-label="Prévia da proposta">${paperHtml(m)}</article>
+  </div>
+  <div class="actions"><button class="btn ghost" id="back">Voltar ao painel</button><button class="btn ghost" id="toprecos2">Preços e condições</button></div>`;
+}
+
+function vPrecos(){
+  const c=CFG_EDIT;
+  return `
+  <section class="stack">
+    <span class="eyebrow">Só você vê esta área</span>
+    <h1>Preços e condições</h1>
+    <p class="muted">Estes valores entram em todas as propostas geradas. Mude e toque em Salvar.</p>
+  </section>
+  <section class="card stack">
+    <h2>Serviços</h2>
+    <div class="svcs">${c.servicos.map((s,i)=>`
+      <div class="svc">
+        <div class="svc-top">
+          <label class="f" style="flex:2 1 220px">Nome<input type="text" id="cs-n-${i}" data-cf="servicos.${i}.nome" value="${esc(s.nome)}"></label>
+          <label class="f" style="flex:1 1 110px">Implantação (R$)<input type="number" min="0" step="10" id="cs-i-${i}" data-cf="servicos.${i}.impl" data-num="1" value="${s.impl}"></label>
+          <label class="f" style="flex:1 1 110px">Mensalidade (R$)<input type="number" min="0" step="10" id="cs-m-${i}" data-cf="servicos.${i}.mensal" data-num="1" value="${s.mensal}"></label>
+          <label class="f" style="flex:1 1 140px">Prazo<input type="text" id="cs-p-${i}" data-cf="servicos.${i}.prazo" value="${esc(s.prazo)}"></label>
+          <button class="x" data-csrm="${i}" aria-label="Remover ${esc(s.nome)}" title="Remover serviço">×</button>
+        </div>
+        <label class="f">O que inclui<textarea id="cs-c-${i}" data-cf="servicos.${i}.inclui" style="min-height:64px">${esc(s.inclui)}</textarea></label>
+        <label class="tog"><input type="checkbox" id="cs-w-${i}" data-cf="servicos.${i}.whatsapp" data-bool="1" ${s.whatsapp?'checked':''}> Usa WhatsApp (soma os custos de WhatsApp na proposta)</label>
+      </div>`).join('')}</div>
+    <div><button class="btn ghost sm" id="csadd">Adicionar serviço</button></div>
+  </section>
+  <section class="card stack">
+    <h2>Condições</h2>
+    <div class="two">
+      <label class="f">Validade da proposta (dias)<input type="number" min="1" id="cf-v" data-cf="validadeDias" data-num="1" value="${c.validadeDias}"></label>
+    </div>
+    <label class="f">Forma de pagamento da implantação<input type="text" id="cf-p" data-cf="pagamento" value="${esc(c.pagamento)}"></label>
+    <label class="f">Contato no rodapé<input type="text" id="cf-c" data-cf="contato" value="${esc(c.contato)}"></label>
+  </section>
+  <section class="card stack">
+    <h2>Ferramentas (estimativa por mês, pagas pelo cliente)</h2>
+    ${c.ferramentas.map((f,i)=>`<div class="svc-top">
+      <label class="f" style="flex:2 1 220px">Ferramenta<input type="text" id="cfe-n-${i}" data-cf="ferramentas.${i}.nome" value="${esc(f.nome)}"></label>
+      <label class="f" style="flex:1 1 110px">R$ por mês<input type="number" min="0" step="10" id="cfe-v-${i}" data-cf="ferramentas.${i}.valor" data-num="1" value="${f.valor}"></label>
+      <label class="f" style="flex:1 1 170px">Entra quando<select id="cfe-q-${i}" data-cf="ferramentas.${i}.quando"><option value="sempre" ${f.quando==='sempre'?'selected':''}>Em toda proposta</option><option value="whatsapp" ${f.quando==='whatsapp'?'selected':''}>Só com WhatsApp</option></select></label>
+    </div>`).join('')}
+  </section>
+  <div class="actions"><button class="btn ghost" id="back">Voltar</button><div class="row"><span id="cfmsg" class="muted" role="status" style="font-size:13px">${esc(CFG_MSG)}</span><button class="btn" id="cfsave">Salvar preços</button></div></div>`;
+}
+
+/* ---------- IA (capability sample) ---------- */
+const samplePromise = (window.claude && typeof window.claude.use==='function')
+  ? window.claude.use('sample').catch(()=>null) : Promise.resolve(null);
+async function getSample(){
+  if(S.mode==='guiado') return null;
+  const s = await samplePromise;
+  if(!s){ S.mode='guiado'; return null; }
+  return s;
+}
+function errMsg(e){
+  const c = e && e.code;
+  if(c==='rate_limited') return 'A IA está com muitos pedidos agora.';
+  if(c==='session_expired') return 'Sua sessão no Claude expirou.';
+  if(PERMANENT.includes(c)) return 'A análise com IA não está liberada nesta visualização.';
+  return 'Não consegui falar com a IA agora.';
+}
+async function askAI(prompt){
+  const sample = await getSample();
+  if(!sample) return null;
+  CTL = new AbortController();
+  try{
+    const r = await sample.json(prompt,{signal:CTL.signal});
+    if(S.mode!=='ia'){S.mode='ia';}
+    return r;
+  }catch(e){
+    if(e && e.code==='cancelled') throw e;
+    if(PERMANENT.includes(e && e.code)) S.mode='guiado';
+    S.notice = errMsg(e) + ' Segui com a lista padrão da Sinapsy — você pode ajustar tudo.';
+    return null;
+  }
+}
+const str = v => (typeof v==='string'?v:'').trim();
+const clamp = v => { const n=Math.round(Number(v)); return isFinite(n)?Math.max(0,Math.min(10,n)):5; };
+function ctx(){
+  const e=S.empresa;
+  return `Empresa: ${e.nome}\nSegmento: ${e.segmento||'não informado'}\nDescrição do dono: ${e.descricao}\n${S.resumo?'Leitura confirmada: '+S.resumo+'\n':''}`;
+}
+
+/* ---------- Catálogo helpers ---------- */
+function catDept(name){
+  if(CAT[name]) return name;
+  for(const [re,k] of DEPT_KEYS) if(re.test(name)) return k;
+  return null;
+}
+function catTask(name){
+  const n=name.toLowerCase();
+  for(const k in CAT) for(const t of CAT[k].t) if(t[0].toLowerCase()===n) return t;
+  return null;
+}
+
+/* ---------- Transições ---------- */
+async function run(label, fn){
+  BUSY = label; FORM_ERR=''; render();
+  try{ await fn(); }
+  catch(e){ if(!(e && e.code==='cancelled')){ S.notice='Algo deu errado. Tente de novo.'; } }
+  BUSY = null; CTL=null; save(); render(); window.scrollTo({top:0});
+}
+
+async function submitEmpresa(){
+  const e=S.empresa;
+  if(!e.nome.trim()){FORM_ERR='Escreva o nome da empresa.';render();return;}
+  if(e.descricao.trim().length<20){FORM_ERR='Conte um pouco mais sobre o que a empresa faz (pelo menos uma frase).';render();return;}
+  S.notice='';
+  await run('Lendo o seu negócio…', async ()=>{
+    const r = await askAI(`Você é consultor de IA da SinapsyIA e está fazendo um diagnóstico de onde a IA pode ajudar uma empresa brasileira.
+
+${ctx()}
+Faça duas coisas:
+1) "resumo": uma frase em português do Brasil, direta, começando com "Você tem", resumindo o tipo de negócio, o nicho, se é presencial ou digital e o público atendido.
+2) "departamentos": de 6 a 8 áreas típicas para ESTE tipo de negócio (adaptadas a ele, não uma lista genérica). Cada uma com "nome" (até 3 palavras) e "descricao" (até 8 palavras dizendo o que cobre).
+
+Responda só com JSON neste formato: {"resumo":"...","departamentos":[{"nome":"...","descricao":"..."}]}`);
+    if(r && Array.isArray(r.departamentos) && r.departamentos.length){
+      S.resumo = str(r.resumo);
+      S.deptOptions = r.departamentos.map(d=>({nome:str(d&&d.nome).slice(0,40),descricao:str(d&&d.descricao).slice(0,90)})).filter(d=>d.nome).slice(0,9);
+    }else{
+      S.resumo = `Você tem a ${e.nome}${e.segmento?', no segmento '+e.segmento.toLowerCase():''}.`;
+      S.deptOptions = Object.keys(CAT).map(k=>({nome:k,descricao:CAT[k].d}));
+    }
+    S.depts=[]; S.taskOptions={}; S.chosen={}; S.tasks=[]; S.deptIdx=0;
+    S.step='areas';
+  });
+}
+
+async function goTarefas(i){
+  S.deptIdx=i; S.notice='';
+  const dept=S.depts[i];
+  if(S.taskOptions[dept]){ S.step='tarefas'; save(); render(); window.scrollTo({top:0}); return; }
+  await run(`Listando tarefas de ${dept}…`, async ()=>{
+    const r = await askAI(`Você é consultor de IA da SinapsyIA.
+
+${ctx()}
+Área da empresa: ${dept}
+
+Liste de 6 a 9 tarefas TÍPICAS que essa área executa neste negócio específico. Personalize de verdade para o nicho (nada genérico). Cada tarefa com até 8 palavras, começando com verbo no infinitivo.
+
+Responda só com JSON: {"tarefas":["...","..."]}`);
+    let opts = (r && Array.isArray(r.tarefas)) ? r.tarefas.map(str).filter(Boolean).slice(0,10) : null;
+    if(!opts){ const k=catDept(dept); opts = k ? CAT[k].t.map(t=>t[0]) : []; }
+    S.taskOptions[dept]=opts;
+    S.chosen[dept]=opts.slice();
+    S.step='tarefas';
+  });
+}
+
+async function goNotas(){
+  const dept=S.depts[S.deptIdx], list=S.chosen[dept]||[];
+  S.notice='';
+  await run(`Avaliando ${list.length} tarefas de ${dept}…`, async ()=>{
+    const r = await askAI(`Você é consultor de IA da SinapsyIA, avaliando onde automatizar com IA.
+
+${ctx()}
+Área: ${dept}
+
+Para cada tarefa abaixo, avalie:
+- "impacto" (inteiro 0-10): quanto automatizar move o negócio de verdade: aumenta vendas ou faturamento, reduz custo operacional, ou libera muitas horas de pessoas caras. 8-10: pode mudar o resultado financeiro do negócio. 5-7: ganho real, mas não transformador. 2-4: útil, mas pequeno. 0-1: cosmético, organizacional ou raro. Organizar arquivos, formatar documentos e tarefas raras ficam baixo.
+- "esforco" (inteiro 0-10): trabalho para construir e manter a solução. Processo artesanal ou nebuloso, muitas integrações, regras condicionais e dados sensíveis aumentam. Processo padronizado diminui. Se a IA conversa direto com cliente ou lead, some 1 a 2 pontos.
+- "tipo": "Interno" (roda nos bastidores, o cliente não interage) ou "Externo" (conversa direto com cliente ou lead).
+- "alavanca": uma frase concreta em português do Brasil (até 30 palavras) dizendo como a IA entra na tarefa. Cite ferramentas reais (Claude, n8n, Make, WhatsApp, Whisper) só quando ajudar. Não faça passo a passo.
+Use a escala inteira e evite repetir as mesmas notas: as tarefas precisam ficar bem separadas num gráfico.
+
+Tarefas:
+${list.map((t,j)=>`${j+1}. ${t}`).join('\n')}
+
+Responda só com JSON, na mesma ordem: {"tarefas":[{"nome":"<igual à lista>","impacto":0,"esforco":0,"tipo":"Interno","alavanca":"..."}]}`);
+    const arr = (r && Array.isArray(r.tarefas)) ? r.tarefas : null;
+    const built = list.map((nome,j)=>{
+      const a = arr && arr[j];
+      if(a && typeof a==='object' && str(a.alavanca)){
+        return {nome, impacto:clamp(a.impacto), esforco:clamp(a.esforco), tipo:/ext/i.test(str(a.tipo))?'E':'I', alavanca:str(a.alavanca)};
+      }
+      const c = catTask(nome);
+      if(c) return {nome, impacto:c[1], esforco:c[2], tipo:c[3], alavanca:c[4]};
+      return {nome, impacto:5, esforco:5, tipo:'I', alavanca:'Tarefa específica do seu negócio: a Sinapsy define a melhor forma de aplicar IA nela na conversa de diagnóstico.'};
+    });
+    // mantém ids estáveis de tarefas já existentes
+    const old = S.tasks.filter(t=>t.dept===dept);
+    S.tasks = S.tasks.filter(t=>t.dept!==dept);
+    for(const b of built){
+      const prev = old.find(o=>o.nome===b.nome);
+      S.tasks.push(Object.assign({id: prev?prev.id:S.nextId++, dept}, b));
+    }
+    S.step='notas';
+  });
+}
+
+function goNext(){
+  if(S.deptIdx < S.depts.length-1){ goTarefas(S.deptIdx+1); }
+  else { S.step='resultado'; S.notice=''; S.sel=null; save(); render(); window.scrollTo({top:0}); }
+}
+
+/* ---------- Quadrantes ---------- */
+const QUADS = {
+  win:  {k:'win',  ico:'🚀', t:'QUICK WIN',       s:'Comece aqui',     d:'Alto impacto, baixo esforço', col:'var(--q-win)'},
+  moon: {k:'moon', ico:'🎯', t:'MOONSHOT',        s:'Estratégico',     d:'Alto impacto, alto esforço',  col:'var(--q-moon)'},
+  fill: {k:'fill', ico:'🧩', t:'FILLER',          s:'Talvez depois',   d:'Baixo impacto, baixo esforço',col:'var(--q-fill)'},
+  avoid:{k:'avoid',ico:'⚠️', t:'AVOID / DELEGAR', s:'Evitar agora',    d:'Baixo impacto, alto esforço', col:'var(--q-avoid)'}
+};
+function quad(t){ const hi=t.impacto>5, lo=t.esforco<5; return hi?(lo?'win':'moon'):(lo?'fill':'avoid'); }
+function score(t){ return t.impacto - 0.6*t.esforco + (t.tipo==='I'?0.5:0); }
+function best(arr){ return arr.slice().sort((a,b)=>score(b)-score(a))[0]; }
+function recommend(){
+  const ts=S.tasks; if(!ts.length) return null;
+  const w=ts.filter(t=>quad(t)==='win'); if(w.length) return {t:best(w),kind:'win'};
+  const m=ts.filter(t=>quad(t)==='moon'); if(m.length) return {t:best(m),kind:'moon'};
+  return {t:best(ts),kind:'other'};
+}
+function numOf(t){ return S.tasks.indexOf(t)+1; }
+
+/* ---------- Código de acesso ----------
+   Um código por cliente, criado/editado no Painel (docs col=codigos {codigo,nome,ativo}).
+   Vale nas 3 ferramentas; o banco confere (função sinapsy_codigo) e recusa envio sem código ativo.
+   (criarCodigo/desativar abaixo são da versão antiga e não aparecem mais na tela.) */
+const ACC_KEY='sinapsy-acesso-v3'; // igual nas 3 ferramentas e no runtime
+const ACC_CHAVE='I5nwt2BAF3pvLfWvOZPIbBHy'; // igual nos dois apps
+const ACC_ALFA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+let ACC={ok:false,hash:null,codigo:null,checked:false,err:'',busy:false,txt:''};
+let CODIGOS=null, COD_MSG='', COD_ERR=false;
+function normCode(c){ return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+async function sha(s){
+  const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return new Uint8Array(b);
+}
+async function hashCode(c){ return normCode(c); } // o código (normalizado) identifica o cliente
+async function assinatura(base){ const b=await sha('sinapsyia-v2:'+ACC_CHAVE+':'+normCode(base)); return Array.from(b.slice(0,4)).map(x=>ACC_ALFA[x%ACC_ALFA.length]).join(''); }
+// Conferido pelo banco (Supabase): o código existe e está ativo
+async function codigoValido(c){ return (await window.SinapsyAcesso.conferir(c))===true; }
+// true = desativado; false = ativo; null = não deu para conferir
+async function revogado(h){ return false; } // desativar = codigoValido falso
+async function initAcesso(){
+  let c=null; try{ c=localStorage.getItem(ACC_KEY); }catch(e){}
+  if(c && await codigoValido(c)){
+    const h=await hashCode(c), rv=await revogado(h);
+    if(rv===true){ try{ localStorage.removeItem(ACC_KEY); }catch(e){} }
+    else { ACC.ok=true; ACC.hash=h; ACC.codigo=normCode(c); }
+  }
+  ACC.checked=true;
+}
+async function entrarCodigo(){
+  if(ACC.busy) return;
+  const v=ACC.txt;
+  if(normCode(v).length<4){ ACC.err='Digite o código que a SinapsyIA te enviou.'; render(); return; }
+  ACC.busy=true; ACC.err=''; render();
+  let ok=false, rv=null, h=null;
+  try{ ok=await codigoValido(v); if(ok){ h=await hashCode(v); rv=await revogado(h); } }catch(e){}
+  ACC.busy=false;
+  if(ok && rv!==true){ ACC.ok=true; ACC.hash=h; ACC.codigo=normCode(v); ACC.txt=''; try{ localStorage.setItem(ACC_KEY,normCode(v)); }catch(e){} }
+  else ACC.err = ok ? 'Este código foi desativado. Peça um novo à SinapsyIA no Instagram @sinapsyia.' : 'Código inválido. Confira se digitou certo ou peça o seu à SinapsyIA no Instagram @sinapsyia.';
+  render(); window.scrollTo({top:0});
+}
+function vAcesso(titulo){
+  return `<section class="card stack acc">
+    <span class="eyebrow">Acesso por convite</span>
+    <h1>Necessita de código de verificação</h1>
+    <p class="muted">Para usar o ${esc(titulo)} da SinapsyIA, digite o código de verificação que você recebeu.</p>
+    <label class="f">Código de verificação<input type="text" id="acc-code" value="${esc(ACC.txt)}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ex.: ANA2026-K7P2" maxlength="40"></label>
+    ${ACC.err?`<p class="err" role="alert">${esc(ACC.err)}</p>`:''}
+    <div class="actions"><span class="muted" style="font-size:13px">Não tem código? Fale com a gente no Instagram <span class="handle">@sinapsyia</span>.</span><button class="btn" data-acc="entrar" ${ACC.busy?'disabled':''}>${ACC.busy?'Conferindo…':'Inserir código'}</button></div>
+  </section>`;
+}
+function baseDoNome(nome){
+  const p=normCode(String(nome).normalize('NFD').replace(/[̀-ͯ]/g,'')).replace(/[0-9]/g,'').slice(0,3)||'SNP';
+  const r=crypto.getRandomValues(new Uint8Array(2));
+  return p+Array.from(r).map(x=>ACC_ALFA[x%ACC_ALFA.length]).join('');
+}
+function subscribeCodigos(onChange){
+  DB.collection('codigos').onSnapshot(s=>{ CODIGOS=s.docs.map(d=>Object.assign({},d.data(),{id:d.id})); onChange(); }, ()=>{ if(CODIGOS===null){ CODIGOS=[]; onChange(); } });
+}
+async function criarCodigo(btn){
+  const nome=str((document.getElementById('cod-nome')||{}).value), cust=str((document.getElementById('cod-codigo')||{}).value);
+  if(!nome){ COD_ERR=true; COD_MSG='Escreva o nome do cliente.'; render(); return; }
+  const base = cust ? normCode(cust) : baseDoNome(nome);
+  if(base.length<3){ COD_ERR=true; COD_MSG='O começo do código precisa ter pelo menos 3 letras ou números.'; render(); return; }
+  if(base.length>20){ COD_ERR=true; COD_MSG='Use no máximo 20 letras ou números no começo do código.'; render(); return; }
+  btn.disabled=true; btn.textContent='Criando…';
+  try{
+    const codigo=base+'-'+await assinatura(base), h=await hashCode(codigo);
+    const ex=await DB.doc('codigos_admin/'+h).get();
+    if(ex.exists){ COD_ERR=true; COD_MSG=`O código ${codigo} já existe na lista.`; render(); return; }
+    await DB.doc('codigos_admin/'+h).set({codigo, nome, criadoEm:Date.now()});
+    try{ await DB.doc('revogados/'+h).delete(); }catch(e){}
+    COD_ERR=false; COD_MSG=`Código ${codigo} criado para ${nome}. Ele vale no Diagnóstico de IA e na Criação de App. Copie e envie junto com o link.`;
+  }catch(e){ COD_ERR=true; COD_MSG='Não consegui criar o código agora. Tente de novo.'; }
+  render();
+}
+async function desativar(h, apagarDaLista){
+  await DB.doc('revogados/'+h).set({em:Date.now()});
+  if(apagarDaLista) await DB.doc('codigos_admin/'+h).delete();
+}
+async function apagarCodigo(h){
+  try{ await desativar(h,true); COD_ERR=false; COD_MSG='Código desativado neste app. Para bloquear também no outro app, cole o código em "Desativar um código" no painel de lá.'; }
+  catch(e){ COD_ERR=true; COD_MSG='Não consegui desativar agora. Tente de novo.'; }
+  render();
+}
+async function desativarDigitado(btn){
+  const v=str((document.getElementById('cod-off')||{}).value);
+  if(!v){ COD_ERR=true; COD_MSG='Cole o código que você quer desativar.'; render(); return; }
+  if(!(await codigoValido(v))){ COD_ERR=true; COD_MSG='Esse não é um código válido da SinapsyIA.'; render(); return; }
+  btn.disabled=true;
+  try{ const h=await hashCode(v); await desativar(h,true); COD_ERR=false; COD_MSG=`Código ${normCode(v).slice(0,-4)}-${normCode(v).slice(-4)} desativado neste app.`; }
+  catch(e){ COD_ERR=true; COD_MSG='Não consegui desativar agora. Tente de novo.'; }
+  render();
+}
+function nomeDoCodigo(h){ const c=h&&(CODIGOS||[]).find(x=>normCode(x.codigo)===h); return c?`${c.nome} (${c.codigo})`:''; }
+function vCodigos(usos){
+  return `<section class="card row" style="justify-content:space-between">
+    <div><h2>Códigos de acesso</h2><p class="muted" style="font-size:13.5px">Os códigos dos clientes valem nas 3 ferramentas (Onboarding, Diagnóstico e Criação de App). Crie, edite e desative no Painel.</p></div>
+    <a class="btn ghost" href="../painel/#codigos" style="text-decoration:none">Abrir códigos no Painel</a>
+  </section>`;
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest('[data-acc]'); if(!b) return;
+  const a=b.dataset.acc;
+  if(a==='entrar') entrarCodigo();
+  else if(a==='criar'){ if(OWNER&&DB) criarCodigo(b); }
+  else if(a==='desativar'){ if(OWNER&&DB) desativarDigitado(b); }
+  else if(a==='copiar'){ const t=b.dataset.cod; try{ await navigator.clipboard.writeText(t); b.textContent='Copiado'; setTimeout(()=>{b.textContent='Copiar';},1500); }catch(err){ COD_ERR=false; COD_MSG='Código: '+t+' (selecione e copie)'; render(); } }
+  else if(a==='apagar'){ if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; } b.disabled=true; apagarCodigo(b.dataset.h); }
+});
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='acc-code') ACC.txt=e.target.value; });
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target && e.target.id==='acc-code'){ e.preventDefault(); entrarCodigo(); } });
+
+/* ---------- Render ---------- */
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app = document.getElementById('app'), top = document.getElementById('top');
+
+function renderTop(){
+  const idx = {empresa:0,areas:1,tarefas:2,notas:2,resultado:3,painel:-1,precos:-1,proposta:-1}[S.step];
+  const names=['Empresa','Áreas','Tarefas','Resultado'];
+  top.innerHTML = `
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M21 10.5c-1.2-1.3-3-2-5-2-3 0-5 1.6-5 3.8 0 4.9 10 3 10 7.6 0 2.3-2.2 3.8-5.2 3.8-2.2 0-4.2-.8-5.4-2.3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="21" cy="10.5" r="1.9" fill="#fff"/><circle cx="10.4" cy="21.4" r="1.9" fill="#fff"/></svg>SinapsyIA</div>
+    ${OWNER&&DB?`<button class="btn ghost sm" id="painelbtn" ${S.step==='painel'?'aria-current="page"':''}>Meus diagnósticos${DIAGS&&DIAGS.length?' ('+DIAGS.length+')':''}</button>`:''}
+    <nav class="steps" aria-label="Etapas">${names.map((n,i)=>`<span class="st ${i===idx?'on':i<idx?'done':''}"><b>${i<idx?'✓':i+1}</b>${n}</span>`).join('')}</nav>`;
+  const pb=document.getElementById('painelbtn');
+  if(pb) pb.onclick=()=>{ if(BUSY) return; if(!['painel','precos','proposta'].includes(S.step)) S.prevStep=S.step; S.step='painel'; PROP=null; CFG_EDIT=null; PANEL_MSG=''; save(); render(); window.scrollTo({top:0}); };
+}
+
+function vPainel(){
+  const list=(DIAGS||[]).slice().sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
+  let body;
+  if(DB_ERR) body=`<p class="err">${esc(DB_ERR)}</p>`;
+  else if(DIAGS===null) body='<p class="muted">Carregando…</p>';
+  else if(!list.length) body='<p class="empty">Nenhum diagnóstico salvo ainda. Importe o primeiro acima, ou faça um diagnóstico e toque em "Salvar no painel" no resultado.</p>';
+  else body=`<div class="saved">${list.map(d=>{
+    const ts=Array.isArray(d.tasks)?d.tasks:[], w=ts.filter(t=>quad({impacto:clamp(t.impacto),esforco:clamp(t.esforco)})==='win').length;
+    return `<div class="srow"><button class="sopen" data-open="${esc(d.id)}"><span class="nm">${esc(d.empresa||'Sem nome')}${d.novo?' <span class="codetag" style="color:#22D3EE">Novo</span>':''}</span><span class="meta">${esc([fmtDate(d),d.segmento,ts.length+' tarefas',w+' quick win'+(w===1?'':'s'),d.origem,nomeDoCodigo(d.acesso)?'código de '+nomeDoCodigo(d.acesso):''].filter(Boolean).join(' · '))}</span></button><button class="btn sm" data-prop="${esc(d.id)}">${d.proposta?'Ver proposta':'Gerar proposta'}</button><button class="btn ghost sm" data-del="${esc(d.id)}">Apagar</button></div>`;
+  }).join('')}</div>`;
+  return `
+  <section class="stack">
+    <span class="eyebrow">Só você vê esta área</span>
+    <h1>Meus diagnósticos</h1>
+    <p class="muted">Cole aqui a mensagem que o cliente te mandou. O código no final dela traz o diagnóstico completo.</p>
+    <div class="row"><button class="btn ghost sm" id="toprecos">Preços e condições</button></div>
+  </section>
+  <section class="card stack">
+    <h2>Importar diagnóstico</h2>
+    <textarea id="importbox" placeholder="Cole a mensagem inteira que o cliente copiou…" aria-label="Mensagem do cliente">${esc(IMPORT_TXT)}</textarea>
+    ${PANEL_MSG?`<p class="${PANEL_ERR?'err':'okmsg'}" role="status">${esc(PANEL_MSG)}</p>`:''}
+    <div class="actions"><button class="btn ghost" id="back">Voltar</button><button class="btn" id="import" ${DB_ERR?'disabled':''}>Importar e salvar</button></div>
+  </section>
+  <section class="card stack">
+    <h2>Salvos${DIAGS?` <span class="muted" style="font-size:15px;font-weight:500">(${list.length})</span>`:''}</h2>
+    ${body}
+  </section>
+  ${vCodigos(h=>(DIAGS||[]).filter(d=>d.acesso===h).length)}`;
+}
+
+function busyRow(){
+  return `<div class="busy" role="status"><span class="spin"></span><div style="flex:1;min-width:200px">${esc(BUSY)}<small>Se o Claude pedir permissão, toque em Permitir. A análise pode levar até um minuto.</small></div><button class="btn ghost sm" id="cancel">Cancelar</button></div>`;
+}
+const noticeHtml = () => S.notice?`<div class="notice">${esc(S.notice)}</div>`:'';
+
+function render(){
+  renderTop();
+  // Visitante só entra com código de acesso válido.
+  if(!OWNER){
+    if(!OWNER_CHECKED){ app.className='wrap'; app.innerHTML='<p class="muted" style="padding-top:24px">Carregando…</p>'; return; }
+    if(!ACC.ok){ app.className='wrap'; app.innerHTML=vAcesso('Diagnóstico de IA'); return; }
+  }
+  const ownerStep = ['painel','precos','proposta'].includes(S.step);
+  if(ownerStep && !OWNER_CHECKED){ app.className='wrap'; app.innerHTML='<p class="muted" style="padding-top:24px">Carregando…</p>'; return; }
+  if(ownerStep && !(OWNER&&DB)) S.step = S.prevStep && !['painel','precos','proposta'].includes(S.prevStep) ? S.prevStep : 'empresa';
+  if(S.step==='proposta' && !PROP) S.step='painel';
+  if(S.step==='precos' && !CFG_EDIT) CFG_EDIT=clone(CFG);
+  app.className = 'wrap' + (['resultado','proposta','precos'].includes(S.step)?' wide':'');
+  const v = {empresa:vEmpresa,areas:vAreas,tarefas:vTarefas,notas:vNotas,resultado:vResultado,painel:vPainel,proposta:vProposta,precos:vPrecos}[S.step]();
+  app.innerHTML = v + `<footer class="foot">Diagnóstico de IA · SinapsyIA · Instagram @sinapsyia</footer>`;
+  bind();
+}
+
+function vEmpresa(){
+  const e=S.empresa, dis=BUSY?'disabled':'';
+  return `
+  <section class="hero">
+    <span class="eyebrow">Diagnóstico gratuito</span>
+    <h1>Onde a IA entra <span class="grad-text">no seu negócio?</span></h1>
+    <p class="lead">Em cerca de 10 minutos você descobre quais tarefas da sua empresa valem ser automatizadas primeiro, e quais é melhor deixar para depois.</p>
+    <ol class="how">
+      <li><strong>Você conta o que a empresa faz.</strong> A IA propõe as áreas e as tarefas típicas do seu negócio.</li>
+      <li><strong>Você confirma ou corrige.</strong> Não precisa pontuar nada: a análise já vem pronta.</li>
+      <li><strong>Sai a sua matriz.</strong> Impacto × esforço, com o ponto exato por onde começar.</li>
+    </ol>
+  </section>
+  ${noticeHtml()}
+  <section class="card stack">
+    <h2>Sobre a sua empresa</h2>
+    <fieldset ${dis} style="border:0;padding:0;margin:0" class="stack">
+      <div class="two">
+        <label class="f">Nome da empresa<input type="text" id="nome" value="${esc(e.nome)}" placeholder="Ex.: Clínica Bem Viver" autocomplete="organization"></label>
+        <label class="f">Segmento<select id="segmento"><option value="">Escolha…</option>${SEGMENTOS.map(s=>`<option ${s===e.segmento?'selected':''}>${esc(s)}</option>`).join('')}</select></label>
+      </div>
+      <label class="f">O que a empresa faz, para quem e como vende?<textarea id="descricao" placeholder="Ex.: Clínica de fisioterapia em Recife com 6 profissionais. Atendemos adultos com dor nas costas, a maioria chega pelo Instagram e marca pelo WhatsApp.">${esc(e.descricao)}</textarea></label>
+    </fieldset>
+    ${FORM_ERR?`<p class="err" role="alert">${esc(FORM_ERR)}</p>`:''}
+    ${BUSY?busyRow():`<div class="actions"><span class="muted" style="font-size:13px">Quanto mais detalhe, mais certeira a análise.</span><button class="btn" id="go">Começar diagnóstico</button></div>`}
+  </section>`;
+}
+
+function vAreas(){
+  const sel=S.depts, max=3;
+  return `
+  <section class="stack">
+    <span class="eyebrow">Etapa 2 · Áreas</span>
+    <h1>Minha leitura do seu negócio</h1>
+    ${S.resumo?`<p class="reading">${esc(S.resumo)}</p>`:''}
+    <p class="muted">Não é isso? <button class="linkbtn" id="back">Volte e ajuste a descrição</button>.</p>
+  </section>
+  ${noticeHtml()}
+  <section class="card stack">
+    <div><h2>Quais áreas vamos analisar?</h2><p class="muted">Escolha até 3 que você quer priorizar. Focar em poucas deixa o resultado mais útil.</p></div>
+    <div class="chips">${S.deptOptions.map((d,i)=>{const on=sel.includes(d.nome);return `<button class="chip" data-dept="${i}" aria-pressed="${on}" ${!on&&sel.length>=max?'disabled':''}><span class="n">${esc(d.nome)}</span>${d.descricao?`<span class="d">${esc(d.descricao)}</span>`:''}</button>`}).join('')}</div>
+    <div class="addrow"><input type="text" id="newdept" placeholder="Falta alguma área? Escreva aqui" aria-label="Nova área"><button class="btn ghost sm" id="adddept">Adicionar</button></div>
+    ${BUSY?busyRow():`<div class="actions"><span class="muted" style="font-size:13px">${sel.length} de ${max} escolhidas</span><button class="btn" id="go" ${sel.length?'':'disabled'}>Mapear tarefas</button></div>`}
+  </section>`;
+}
+
+function vTarefas(){
+  const dept=S.depts[S.deptIdx], opts=S.taskOptions[dept]||[], ch=S.chosen[dept]||[];
+  return `
+  <section class="stack">
+    <span class="eyebrow">Área ${S.deptIdx+1} de ${S.depts.length} · ${esc(dept)}</span>
+    <h1>O que a área de ${esc(dept)} faz hoje?</h1>
+    <p class="muted">Estas são as tarefas que costumam aparecer num negócio como o seu. Desmarque o que você não faz e adicione o que faltar.</p>
+  </section>
+  ${noticeHtml()}
+  <section class="card stack">
+    ${opts.length?`<div class="checks">${opts.map((t,i)=>{const on=ch.includes(t);return `<label class="${on?'':'off'}"><input type="checkbox" data-task="${i}" ${on?'checked':''}><span>${esc(t)}</span></label>`}).join('')}</div>`:`<p class="empty">Ainda não há tarefas nesta área. Adicione as que a sua equipe faz.</p>`}
+    <div class="addrow"><input type="text" id="newtask" placeholder="Adicionar outra tarefa" aria-label="Nova tarefa"><button class="btn ghost sm" id="addtask">Adicionar</button></div>
+    ${BUSY?busyRow():`<div class="actions"><button class="btn ghost" id="back">Voltar</button><button class="btn" id="go" ${ch.length?'':'disabled'}>Analisar ${ch.length} tarefa${ch.length===1?'':'s'}</button></div>`}
+  </section>`;
+}
+
+function vNotas(){
+  const dept=S.depts[S.deptIdx], ts=S.tasks.filter(t=>t.dept===dept), last=S.deptIdx===S.depts.length-1;
+  return `
+  <section class="stack">
+    <span class="eyebrow">Área ${S.deptIdx+1} de ${S.depts.length} · ${esc(dept)}</span>
+    <h1>Onde a IA entra em ${esc(dept)}</h1>
+    <p class="muted">Impacto é o quanto automatizar move o negócio. Esforço é o trabalho para construir e manter a solução. Os dois vão de 0 a 10. Se alguma nota não bate com a sua realidade, é só corrigir.</p>
+  </section>
+  ${noticeHtml()}
+  <section class="card stack">
+    <div class="tasks">${ts.map(t=>`
+      <div class="trow" data-id="${t.id}">
+        <div class="stack" style="gap:4px;min-width:0"><span class="name">${esc(t.nome)}</span></div>
+        <div class="scores">
+          <label class="score">Impacto<input type="number" min="0" max="10" step="1" id="imp-${t.id}" data-f="impacto" value="${t.impacto}"></label>
+          <label class="score">Esforço<input type="number" min="0" max="10" step="1" id="esf-${t.id}" data-f="esforco" value="${t.esforco}"></label>
+          <label class="score">Tipo<select id="tip-${t.id}" data-f="tipo"><option value="I" ${t.tipo==='I'?'selected':''}>Interno</option><option value="E" ${t.tipo==='E'?'selected':''}>Externo</option></select></label>
+          <button class="x" data-rm="${t.id}" aria-label="Remover ${esc(t.nome)}" title="Não é minha realidade">×</button>
+        </div>
+        <p class="lev"><strong style="color:var(--fg);font-weight:600">Alavanca de IA:</strong> ${esc(t.alavanca)}</p>
+      </div>`).join('') || '<p class="empty">Nenhuma tarefa nesta área.</p>'}</div>
+    <p class="muted" style="font-size:12.5px"><span class="tag I">Interno</span> roda nos bastidores &nbsp; <span class="tag E">Externo</span> conversa direto com o seu cliente</p>
+    ${BUSY?busyRow():`<div class="actions"><button class="btn ghost" id="back">Voltar</button><button class="btn" id="go">${last?'Ver meu diagnóstico':'Próxima área: '+esc(S.depts[S.deptIdx+1])}</button></div>`}
+  </section>`;
+}
+
+function matrixSvg(){
+  const W=560,H=540,L=48,R=14,T=14,B=46,pw=W-L-R,ph=H-T-B;
+  const X=e=>L+e/10*pw, Y=i=>T+(10-i)/10*ph;
+  const groups={}; S.tasks.forEach(t=>{const k=t.esforco+','+t.impacto;(groups[k]=groups[k]||[]).push(t);});
+  const pos={}; Object.values(groups).forEach(g=>g.forEach((t,j)=>{
+    if(g.length===1){pos[t.id]=[X(t.esforco),Y(t.impacto)];return;}
+    const a=2*Math.PI*j/g.length - Math.PI/2, r=15+(g.length>4?4:0);
+    pos[t.id]=[X(t.esforco)+r*Math.cos(a), Y(t.impacto)+r*Math.sin(a)];
+  }));
+  const qr=(x0,y0,x1,y1,c,op)=>`<rect x="${X(x0)}" y="${Y(y1)}" width="${X(x1)-X(x0)}" height="${Y(y0)-Y(y1)}" fill="${c}" fill-opacity="${op}"/>`;
+  let s=`<svg class="matrix" viewBox="0 0 ${W} ${H}" role="img" aria-label="Matriz de impacto por esforço com ${S.tasks.length} tarefas">`;
+  s+=qr(0,5,5,10,'#22D3EE',.09)+qr(5,5,10,10,'#A78BFA',.08)+qr(0,0,5,5,'#8B93B8',.05)+qr(5,0,10,5,'#F59E0B',.05);
+  for(let v=0;v<=10;v+=1){
+    s+=`<line x1="${X(v)}" y1="${T}" x2="${X(v)}" y2="${T+ph}" stroke="#A0AAE6" stroke-opacity="${v===5?0:.06}"/>`;
+    s+=`<line x1="${L}" y1="${Y(v)}" x2="${L+pw}" y2="${Y(v)}" stroke="#A0AAE6" stroke-opacity="${v===5?0:.06}"/>`;
+    if(v%2===0){
+      s+=`<text x="${X(v)}" y="${T+ph+18}" fill="#6B739A" font-size="11" text-anchor="middle">${v}</text>`;
+      s+=`<text x="${L-10}" y="${Y(v)+4}" fill="#6B739A" font-size="11" text-anchor="end">${v}</text>`;
+    }
+  }
+  s+=`<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="none" stroke="#A0AAE6" stroke-opacity=".25"/>`;
+  s+=`<line x1="${X(5)}" y1="${T}" x2="${X(5)}" y2="${T+ph}" stroke="#A0AAE6" stroke-opacity=".45" stroke-dasharray="4 4"/>`;
+  s+=`<line x1="${L}" y1="${Y(5)}" x2="${L+pw}" y2="${Y(5)}" stroke="#A0AAE6" stroke-opacity=".45" stroke-dasharray="4 4"/>`;
+  const ql=(x,y,anchor,q)=>`<text x="${x}" y="${y}" font-size="12" font-weight="700" fill="${({win:'#22D3EE',moon:'#A78BFA',fill:'#8B93B8',avoid:'#F59E0B'})[q.k]}" text-anchor="${anchor}" letter-spacing=".06em">${q.ico} ${q.t}</text>`;
+  s+=ql(L+10,T+20,'start',QUADS.win)+ql(L+pw-10,T+20,'end',QUADS.moon)+ql(L+10,T+ph-10,'start',QUADS.fill)+ql(L+pw-10,T+ph-10,'end',QUADS.avoid);
+  s+=`<text x="${L+pw/2}" y="${H-6}" fill="#9BA3C6" font-size="12" text-anchor="middle">Esforço para automatizar →</text>`;
+  s+=`<text transform="translate(14 ${T+ph/2}) rotate(-90)" fill="#9BA3C6" font-size="12" text-anchor="middle">Impacto no negócio →</text>`;
+  S.tasks.forEach(t=>{
+    const [x,y]=pos[t.id], c=t.tipo==='E'?'#FB923C':'#34D399';
+    s+=`<g class="dot ${S.sel===t.id?'sel':''}" data-dot="${t.id}" tabindex="0" role="button" aria-label="${esc(numOf(t)+'. '+t.nome)}"><circle class="ring" cx="${x}" cy="${y}" r="16" fill="none"/><circle class="c" cx="${x}" cy="${y}" r="12" fill="${c}"/><text x="${x}" y="${y+4}" font-size="11" font-weight="700" text-anchor="middle" fill="#0B1020" pointer-events="none">${numOf(t)}</text></g>`;
+  });
+  return s+'</svg>';
+}
+
+function detailHtml(t){
+  if(!t) return '<p class="empty">Toque num ponto da matriz para ver a alavanca de IA daquela tarefa.</p>';
+  const q=QUADS[quad(t)];
+  return `<span class="q" style="color:${q.col}">${q.ico} ${q.t} · ${q.s}</span>
+    <h3 style="font-size:19px">${numOf(t)}. ${esc(t.nome)}</h3>
+    <div class="row"><span class="badge">${esc(t.dept)}</span><span class="tag ${t.tipo}">${t.tipo==='E'?'Externo':'Interno'}</span></div>
+    <div class="kv"><div><b>${t.impacto}</b><span>Impacto</span></div><div><b>${t.esforco}</b><span>Esforço</span></div></div>
+    <p class="lev">${esc(t.alavanca)}</p>`;
+}
+
+function shareText(){
+  const e=S.empresa, d=new Date().toLocaleDateString('pt-BR');
+  let out=`Diagnóstico de IA · SinapsyIA\nEmpresa: ${e.nome}${e.segmento?' ('+e.segmento+')':''}\nData: ${d}\n${S.resumo?S.resumo+'\n':''}Sobre a empresa: ${e.descricao}\n`;
+  for(const k of ['win','moon','fill','avoid']){
+    const ts=S.tasks.filter(t=>quad(t)===k); if(!ts.length) continue;
+    out+=`\n${QUADS[k].t} (${QUADS[k].d})\n`;
+    ts.forEach(t=>{out+=`- ${t.nome} [${t.dept}] · impacto ${t.impacto}, esforço ${t.esforco}, ${t.tipo==='E'?'externo':'interno'}\n  ${t.alavanca}\n`;});
+  }
+  const r=recommend(); if(r) out+=`\nRecomendação: começar por "${r.t.nome}".\n`;
+  out+=`\nCódigo do diagnóstico (não apague):\n${packCode()}\n`;
+  return out;
+}
+
+function vResultado(){
+  const ts=S.tasks, by=k=>ts.filter(t=>quad(t)===k), r=recommend();
+  const today=new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+  const sel = ts.find(t=>t.id===S.sel) || (r&&r.t) || null;
+  const block=k=>{const q=QUADS[k],list=by(k).sort((a,b)=>score(b)-score(a));return `<section class="quad ${k}"><header><h3>${q.ico} ${q.t}</h3><p>${q.s} · ${q.d}</p></header>
+    ${list.length?`<div class="items">${list.map(t=>`<div class="item"><span class="num" style="background:${t.tipo==='E'?'var(--ext)':'var(--int)'}">${numOf(t)}</span><div class="top-line"><span class="nm">${esc(t.nome)}</span><span class="badge">${esc(t.dept)}</span><span class="tag ${t.tipo}">${t.tipo==='E'?'Externo':'Interno'}</span><span class="sc">I ${t.impacto} · E ${t.esforco}</span></div><p class="lv">${esc(t.alavanca)}</p></div>`).join('')}</div>`:'<p class="empty">Nenhuma tarefa caiu aqui.</p>'}</section>`;};
+  let why='';
+  if(r){
+    const t=r.t;
+    if(r.kind==='win') why=`É a tarefa com a melhor relação entre impacto (${t.impacto}/10) e esforço (${t.esforco}/10) no seu mapa. `+(t.tipo==='I'?'Roda nos bastidores, sem expor o seu cliente a uma IA em fase de teste, o que deixa o primeiro projeto mais seguro.':'Ela conversa direto com o seu cliente, então vale começar com um escopo pequeno e alguém da equipe acompanhando as respostas.')+' É o tipo de projeto que costuma sair do papel rápido e já mostra resultado.';
+    else if(r.kind==='moon') why=`Nenhuma tarefa ficou com impacto alto e esforço baixo ao mesmo tempo. Esta é a de maior retorno entre as de alto impacto (${t.impacto}/10), mas o esforço (${t.esforco}/10) pede um projeto planejado, em etapas.`;
+    else why=`Nenhuma tarefa mapeada tem impacto alto. Esta é a com melhor relação entre impacto e esforço; vale também revisar se faltou mapear alguma área com mais peso no faturamento.`;
+  }
+  return `
+  ${S.savedId&&OWNER?`<div class="savedbar">Diagnóstico salvo${S.savedOrigem?' · '+esc(S.savedOrigem):''}${S.savedData?' · '+esc(S.savedData):''}. <button class="linkbtn" id="topanel">Voltar para Meus diagnósticos</button></div>`:''}
+  <section class="res-head">
+    <span class="eyebrow">Diagnóstico de IA · ${esc(S.savedId&&S.savedData?S.savedData:today)}</span>
+    <h1>${esc(S.empresa.nome)}</h1>
+    ${S.resumo?`<p class="muted" style="font-size:16px;max-width:70ch">${esc(S.resumo)}</p>`:''}
+  </section>
+  <section class="stats">
+    <div class="stat"><div class="v">${ts.length}</div><div class="l">tarefas mapeadas</div></div>
+    <div class="stat"><div class="v">${S.depts.length}</div><div class="l">áreas analisadas</div></div>
+    <div class="stat win"><div class="v">${by('win').length}</div><div class="l">quick wins</div></div>
+    <div class="stat moon"><div class="v">${by('moon').length}</div><div class="l">moonshots</div></div>
+  </section>
+  <section class="card stack">
+    <div class="row" style="justify-content:space-between"><h2>Matriz impacto × esforço</h2><div class="legend"><span><i style="background:var(--int)"></i>Interno</span><span><i style="background:var(--ext)"></i>Externo (fala com o cliente)</span></div></div>
+    <div class="matrix-wrap">
+      <div style="min-width:0">${matrixSvg()}</div>
+      <div class="detail stack" id="detail" aria-live="polite">${detailHtml(sel)}</div>
+    </div>
+  </section>
+  ${r?`<section class="reco">
+    <span class="eyebrow">Por onde começar</span>
+    <h2>Comece por: ${esc(r.t.nome)}</h2>
+    <p>${esc(why)}</p>
+    <p class="lev"><strong>Alavanca de IA:</strong> ${esc(r.t.alavanca)}</p>
+  </section>`:''}
+  <section class="quads">${['win','moon','fill','avoid'].map(block).join('')}</section>
+  <section class="card stack share" ${S.savedId?'hidden':''}>
+    <div><h2>Quer tirar isso do papel?</h2><p class="muted">Envie o diagnóstico para a SinapsyIA. A gente analisa com você o primeiro passo, sem compromisso.</p></div>
+    <div class="row"><button class="btn" id="enviar" ${S.enviado?'disabled':''}>${S.enviado?'Enviado ✓':'Enviar para a SinapsyIA'}</button><button class="btn ghost" id="copy">Copiar diagnóstico</button><a class="btn ghost" href="${IG}" target="_blank" rel="noopener" style="text-decoration:none">Abrir conversa no Instagram</a></div>
+    <p id="copymsg" class="muted" style="font-size:13px" role="status"></p>
+    <textarea id="sharebox" readonly hidden aria-label="Texto do diagnóstico">${esc(shareText())}</textarea>
+  </section>
+  ${OWNER&&DB?`<section class="card row" style="justify-content:space-between"><div><h3>Painel da Sinapsy</h3><p class="muted" style="font-size:13px">Só você vê isto. Salva este diagnóstico em Meus diagnósticos.</p></div><div class="row"><span id="savemsg" class="muted" role="status" style="font-size:13px"></span><button class="btn" id="savebtn">${S.savedId?'Atualizar no painel':'Salvar no painel'}</button></div></section>`:''}
+  <div class="actions"><button class="btn ghost" id="back">Ajustar notas</button><button class="btn ghost" id="restart">Começar novo diagnóstico</button></div>`;
+}
+
+/* ---------- Eventos ---------- */
+function $(id){return document.getElementById(id);}
+function bind(){
+  const c=$('cancel'); if(c) c.onclick=()=>{ if(CTL) CTL.abort(); };
+  if(S.step==='empresa'){
+    ['nome','segmento','descricao'].forEach(k=>{const el=$(k); el.addEventListener('input',()=>{S.empresa[k]=el.value;save();});});
+    const g=$('go'); if(g) g.onclick=submitEmpresa;
+  }
+  if(S.step==='areas'){
+    $('back').onclick=()=>{S.step='empresa';S.notice='';save();render();};
+    app.querySelectorAll('[data-dept]').forEach(b=>b.onclick=()=>{
+      const n=S.deptOptions[+b.dataset.dept].nome, i=S.depts.indexOf(n);
+      if(i>=0) S.depts.splice(i,1); else if(S.depts.length<3) S.depts.push(n);
+      save(); render();
+    });
+    const add=()=>{const v=$('newdept').value.trim().slice(0,40); if(!v) return;
+      if(!S.deptOptions.some(d=>d.nome.toLowerCase()===v.toLowerCase())) S.deptOptions.push({nome:v,descricao:'Adicionada por você'});
+      if(S.depts.length<3 && !S.depts.includes(v)) S.depts.push(v); save(); render();};
+    $('adddept').onclick=add; $('newdept').onkeydown=e=>{if(e.key==='Enter')add();};
+    const g=$('go'); if(g) g.onclick=()=>{ S.tasks=S.tasks.filter(t=>S.depts.includes(t.dept)); goTarefas(0); };
+  }
+  if(S.step==='tarefas'){
+    const dept=S.depts[S.deptIdx];
+    app.querySelectorAll('[data-task]').forEach(cb=>cb.onchange=()=>{
+      const t=S.taskOptions[dept][+cb.dataset.task], ch=S.chosen[dept];
+      if(cb.checked){ if(!ch.includes(t)) ch.push(t); } else { const i=ch.indexOf(t); if(i>=0) ch.splice(i,1); }
+      save(); render();
+    });
+    const add=()=>{const v=$('newtask').value.trim().slice(0,90); if(!v) return;
+      if(!S.taskOptions[dept].includes(v)) S.taskOptions[dept].push(v);
+      if(!S.chosen[dept].includes(v)) S.chosen[dept].push(v); save(); render(); const n=$('newtask'); if(n) n.focus();};
+    $('addtask').onclick=add; $('newtask').onkeydown=e=>{if(e.key==='Enter')add();};
+    const b=$('back'); if(b) b.onclick=()=>{ S.notice=''; if(S.deptIdx>0){S.deptIdx--;S.step='notas';} else S.step='areas'; save(); render(); };
+    const g=$('go'); if(g) g.onclick=()=>{
+      // mantém a ordem da lista original
+      S.chosen[dept]=S.taskOptions[dept].filter(t=>S.chosen[dept].includes(t));
+      goNotas();
+    };
+  }
+  if(S.step==='notas'){
+    app.querySelectorAll('.trow [data-f]').forEach(el=>{
+      el.addEventListener('change',()=>{
+        const t=S.tasks.find(x=>x.id===+el.closest('.trow').dataset.id); if(!t) return;
+        if(el.dataset.f==='tipo') t.tipo=el.value; else { t[el.dataset.f]=clamp(el.value); el.value=t[el.dataset.f]; }
+        save();
+      });
+    });
+    app.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
+      const id=+b.dataset.rm, t=S.tasks.find(x=>x.id===id); if(!t) return;
+      S.tasks=S.tasks.filter(x=>x.id!==id);
+      const ch=S.chosen[t.dept]; if(ch){const i=ch.indexOf(t.nome); if(i>=0) ch.splice(i,1);}
+      save(); render();
+    });
+    const b=$('back'); if(b) b.onclick=()=>{S.step='tarefas';S.notice='';save();render();};
+    const g=$('go'); if(g) g.onclick=goNext;
+  }
+  if(S.step==='resultado'){
+    const pick=id=>{ S.sel=id; save();
+      app.querySelectorAll('.dot').forEach(d=>d.classList.toggle('sel',+d.dataset.dot===id));
+      $('detail').innerHTML=detailHtml(S.tasks.find(t=>t.id===id)); };
+    app.querySelectorAll('.dot').forEach(d=>{
+      d.addEventListener('click',()=>pick(+d.dataset.dot));
+      d.addEventListener('mouseenter',()=>pick(+d.dataset.dot));
+      d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(+d.dataset.dot);}});
+    });
+    $('copy').onclick=()=>{
+      const txt=shareText(), box=$('sharebox'), msg=$('copymsg');
+      const fallback=()=>{box.hidden=false;box.focus();box.select();msg.textContent='Selecionei o texto abaixo: copie com Ctrl+C (ou segure e toque em Copiar no celular).';};
+      try{
+        navigator.clipboard.writeText(txt).then(()=>{msg.textContent='Copiado. Agora é só colar na conversa com a @sinapsyia no Instagram.';},fallback);
+      }catch(e){fallback();}
+    };
+    const en=$('enviar'); if(en) en.onclick=async()=>{
+      const msg=$('copymsg'); en.disabled=true; en.textContent='Enviando…';
+      try{
+        if(!DB) throw new Error('sem banco');
+        await DB.collection('diagnosticos').add(docFromPayload(packObj(),'enviado pelo site'));
+        S.enviado=true; save(); en.textContent='Enviado ✓';
+        msg.textContent='Recebemos o seu diagnóstico! A SinapsyIA vai falar com você em breve.';
+      }catch(e){
+        en.disabled=false; en.textContent='Tentar enviar de novo';
+        msg.textContent='Não consegui enviar agora. Tente de novo, ou toque em Copiar diagnóstico e mande no Instagram.';
+      }
+    };
+    $('back').onclick=()=>{S.deptIdx=S.depts.length-1;S.step='notas';S.enviado=false;save();render();};
+    const tp=$('topanel'); if(tp) tp.onclick=()=>{S.step='painel';PANEL_MSG='';save();render();window.scrollTo({top:0});};
+    const sv=$('savebtn'); if(sv) sv.onclick=async()=>{
+      const msg=$('savemsg'); sv.disabled=true; msg.textContent='Salvando…';
+      try{
+        const doc=docFromPayload(packObj(), S.savedOrigem||'feito por você');
+        if(S.savedId){ delete doc.criadoEm; delete doc.data; doc.atualizadoEm=Date.now(); await DB.collection('diagnosticos').doc(S.savedId).update(doc); }
+        else { const ref=DB.collection('diagnosticos').doc(); await ref.set(doc); S.savedId=ref.id; S.savedOrigem=doc.origem; S.savedData=fmtDate(doc); save(); }
+        msg.textContent='Salvo em Meus diagnósticos.'; sv.textContent='Atualizar no painel';
+      }catch(e){ msg.textContent=dbErr(e); }
+      sv.disabled=false;
+    };
+    $('restart').onclick=()=>{
+      const b=$('restart');
+      if(b.dataset.confirm){ S=fresh(); save(); render(); window.scrollTo({top:0}); }
+      else { b.dataset.confirm='1'; b.textContent='Toque de novo para apagar e recomeçar'; }
+    };
+  }
+  if(S.step==='painel'){
+    const ib=$('importbox'); ib.addEventListener('input',()=>{IMPORT_TXT=ib.value;});
+    $('back').onclick=()=>{ S.step=S.prevStep&&S.prevStep!=='painel'?S.prevStep:'empresa'; PANEL_MSG=''; save(); render(); window.scrollTo({top:0}); };
+    $('import').onclick=async()=>{
+      const p=unpack(IMPORT_TXT);
+      if(!p){ PANEL_ERR=true; PANEL_MSG='Não encontrei o código do diagnóstico nesse texto. Peça para o cliente tocar em "Copiar diagnóstico" de novo e colar a mensagem inteira.'; render(); return; }
+      const b=$('import'); b.disabled=true; b.textContent='Salvando…';
+      try{
+        await DB.collection('diagnosticos').add(docFromPayload(p,'enviado pelo cliente'));
+        IMPORT_TXT=''; PANEL_ERR=false; PANEL_MSG=`Diagnóstico de ${str(p.e[0])||'cliente'} salvo.`;
+      }catch(e){ PANEL_ERR=true; PANEL_MSG=dbErr(e); }
+      render();
+    };
+    app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{ const d=(DIAGS||[]).find(x=>x.id===b.dataset.open); if(d) openSaved(d); });
+    app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; }
+      b.disabled=true;
+      try{ await DB.collection('diagnosticos').doc(b.dataset.del).delete(); }
+      catch(e){ PANEL_ERR=true; PANEL_MSG='Não consegui apagar agora. Tente de novo.'; render(); }
+    });
+    app.querySelectorAll('[data-prop]').forEach(b=>b.onclick=()=>{ const d=(DIAGS||[]).find(x=>x.id===b.dataset.prop); if(d) openProposta(d); });
+    $('toprecos').onclick=goPrecos;
+  }
+  if(S.step==='proposta' && PROP){
+    const upd=()=>{ const m=propModel(); $('paper').innerHTML=paperHtml(m); };
+    $('pcli').addEventListener('input',e=>{ PROP.cliente=e.target.value; upd(); });
+    app.querySelectorAll('[data-pi]').forEach(cb=>cb.onchange=()=>{ PROP.itens[+cb.dataset.pi].on=cb.checked; render(); });
+    app.querySelectorAll('[data-ps]').forEach(sel=>sel.onchange=()=>{ PROP.itens[+sel.dataset.ps].servico=sel.value; render(); });
+    app.querySelectorAll('[data-prm]').forEach(b=>b.onclick=()=>{ PROP.itens.splice(+b.dataset.prm,1); render(); });
+    $('addsvcbtn').onclick=()=>{ const v=$('addsvc').value; if(v){ PROP.itens.push({task:null,servico:v,on:true}); render(); } };
+
+    $('ppdf').onclick=downloadPdf;
+    $('pcopy').onclick=copyProp;
+    $('psave').onclick=()=>saveProp(false);
+    $('back').onclick=()=>{ S.step='painel'; PROP=null; save(); render(); window.scrollTo({top:0}); };
+    $('toprecos2').onclick=goPrecos;
+  }
+  if(S.step==='precos' && CFG_EDIT){
+    app.querySelectorAll('[data-cf]').forEach(el=>{
+      const ev = el.tagName==='SELECT' || el.type==='checkbox' ? 'change' : 'input';
+      el.addEventListener(ev,()=>{
+        let v = el.dataset.bool ? el.checked : el.dataset.num ? num(el.value,0) : el.value;
+        setPath(CFG_EDIT, el.dataset.cf, v); CFG_MSG=''; const m=$('cfmsg'); if(m) m.textContent='Alterações não salvas.';
+      });
+    });
+    app.querySelectorAll('[data-csrm]').forEach(b=>b.onclick=()=>{
+      if(CFG_EDIT.servicos.length<=1) return;
+      if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='?'; b.title='Toque de novo para remover'; return; }
+      CFG_EDIT.servicos.splice(+b.dataset.csrm,1); render();
+    });
+    $('csadd').onclick=()=>{ CFG_EDIT.servicos.push({id:'c'+Date.now().toString(36),nome:'Novo serviço',impl:0,mensal:0,prazo:'',inclui:'',whatsapp:false}); render(); };
+    $('back').onclick=()=>{ CFG_EDIT=null; S.step = PROP ? 'proposta' : 'painel'; save(); render(); window.scrollTo({top:0}); };
+    $('cfsave').onclick=async()=>{
+      const b=$('cfsave'); b.disabled=true; $('cfmsg').textContent='Salvando…';
+      try{ const c=normCfg(CFG_EDIT); await DB.doc('config/precos').set(c); CFG=c; CFG_EDIT=clone(c); CFG_MSG='Preços salvos.'; render(); }
+      catch(e){ $('cfmsg').textContent=dbErr(e); b.disabled=false; }
+    };
+  }
+}
+
+render();
+samplePromise.then(s=>{ if(!s && S.mode!=='guiado'){ S.mode='guiado'; save(); renderTop(); } });
+})();
+</script>
+
+</body></html>

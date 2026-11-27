@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Onboarding SinapsyIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: coluna única estreita; boas-vindas, linha do tempo do projeto e formulário em etapas com resumo final. Tema único escuro (marca SinapsyIA). */
+:root{
+  --bg:#0B1020; --surface:#121a30; --surface-2:#18223d; --line:#25304f;
+  --fg:#e8ebf5; --muted:#97a0bd; --violet:#8B5CF6; --cyan:#22D3EE; --ok:#4ade80; --warn:#fbbf24;
+  --f-display:"Poppins",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:720px;margin:0 auto;padding-block:40px 80px;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(28px,6vw,40px);font-weight:600}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--violet),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:20px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);font-weight:600}
+header{display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:600;font-size:15px}
+.brand svg{width:28px;height:28px}
+.brand .x{color:var(--muted);font-weight:400}
+section{display:flex;flex-direction:column;gap:18px}
+
+.timeline{list-style:none;margin:0;padding:0;display:grid}
+.timeline li{display:grid;grid-template-columns:32px 1fr;gap:14px;position:relative;padding-bottom:20px}
+.timeline li:not(:last-child)::before{content:"";position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--line)}
+.dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--violet);display:grid;place-items:center;font-family:var(--f-display);font-weight:600;font-size:14px;background:var(--bg)}
+.timeline li:first-child .dot{background:var(--violet)}
+.timeline h3{font-size:16px;font-weight:600;margin-bottom:4px}
+
+.form-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.steps{display:flex;gap:4px;padding:16px 20px 0}
+.steps button{flex:1;height:5px;border:0;border-radius:3px;background:var(--line);cursor:pointer;padding:0}
+.steps button.done{background:var(--violet)}
+.steps button.cur{background:var(--cyan)}
+.step-head{padding:16px 20px 0;display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.step-head .count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.panel{padding:20px;display:flex;flex-direction:column;gap:18px}
+.group{display:flex;flex-direction:column;gap:18px}
+.group-title{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-top:1px solid var(--line);padding-top:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.field .lbl{font-weight:500;font-size:14px}
+.field small{color:var(--muted);font-size:13px}
+.field small.bad{color:var(--warn)}
+.field small.good{color:var(--ok)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
+input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;color:var(--fg);
+  font:inherit;padding:10px 12px;outline:none}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.25)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;color:var(--muted);transition:.15s}
+.chips input:checked+span{border-color:var(--violet);background:rgba(139,92,246,.18);color:var(--fg)}
+.chips input:focus-visible+span{outline:2px solid var(--cyan);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;align-self:flex-start}
+.seg label{cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:8px 16px;font-size:14px;color:var(--muted)}
+.seg input:checked+span{background:var(--violet);color:#fff}
+.seg input:focus-visible+span{outline:2px solid var(--cyan);outline-offset:-2px}
+.howto{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.howto ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.mail{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mail code{font-family:ui-monospace,Consolas,monospace;background:var(--bg);border:1px solid var(--line);padding:3px 8px;border-radius:6px;user-select:all}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--cyan);padding-left:12px}
+.check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--violet);margin-top:3px;flex:none}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.btn{font:600 14px var(--f-body);border-radius:10px;padding:11px 18px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--fg)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{border:0;background:linear-gradient(90deg,#7C3AED,#06B6D4);color:#fff}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.btn.small{padding:6px 12px;font-size:13px}
+.summary{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px;white-space:pre-wrap;font-size:13.5px;max-height:380px;overflow:auto}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.toast{font-size:13px;color:var(--ok);min-height:1.2em}
+.saved{font-size:12px;color:var(--muted)}
+footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--line);padding-top:20px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="#18223d"/><path d="M21 10.5c-1.2-1.4-3-2-5-2-3 0-5 1.6-5 3.8 0 4.9 10 2.8 10 7.6 0 2.3-2.2 3.9-5.2 3.9-2.2 0-4.2-.8-5.5-2.3" fill="none" stroke="url(#g)" stroke-width="2.4" stroke-linecap="round"/><circle cx="21" cy="10.5" r="1.8" fill="#22D3EE"/><circle cx="10.3" cy="21.5" r="1.8" fill="#8B5CF6"/></svg>
+      SinapsyIA <span class="x" id="brandClient"></span>
+    </div>
+    <p class="eyebrow">Boas-vindas</p>
+    <h1 id="hello">Que bom ter você com a <em>gente</em>.</h1>
+    <p class="muted">Este é o ponto de partida do nosso projeto. Abaixo você vê como ele vai andar e, em seguida, um formulário com o que precisamos para fazer o contrato e começar. Leva uns 10 minutos, e o que você digitar fica salvo neste navegador até você enviar.</p>
+  </header>
+
+  <!-- Portão: só entra com o código de acesso que a SinapsyIA enviou -->
+  <section id="gate" hidden>
+    <div class="form-card"><div class="panel">
+      <p class="eyebrow" style="margin:0">Acesso por convite</p>
+      <h2 style="margin:0">Digite o seu código de acesso</h2>
+      <p class="muted" style="margin:0">Ele veio junto com o link que a SinapsyIA te mandou. Ex.: ANA2026-K7P2.</p>
+      <div class="field"><label for="gateCode">Código de acesso</label><input type="text" id="gateCode" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40"></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn primary" id="gateGo">Entrar</button><span class="muted" id="gateMsg" role="status" style="font-size:13.5px"></span></div>
+    </div></div>
+  </section>
+  <p class="muted" id="gateWait">Carregando…</p>
+
+  <section data-protegido hidden>
+    <h2>Como vai ser</h2>
+    <ol class="timeline">
+      <li><span class="dot">1</span><div><h3>Formulário de início</h3><p class="muted">Você preenche esta página com os dados da empresa, os contatos e os acessos.</p></div></li>
+      <li><span class="dot">2</span><div><h3>Contrato</h3><p class="muted">Enviamos o contrato com os seus dados para assinatura digital, pelo celular mesmo.</p></div></li>
+      <li><span class="dot">3</span><div><h3>Reunião de início</h3><p class="muted">Alinhamos os detalhes do projeto, o estilo e as prioridades.</p></div></li>
+      <li><span class="dot">4</span><div><h3>Construção e aprovação</h3><p class="muted">Montamos tudo e você aprova antes de qualquer coisa ir ao ar.</p></div></li>
+      <li><span class="dot">5</span><div><h3>Entrega e acompanhamento</h3><p class="muted">O projeto vai ao ar e seguimos monitorando e ajustando.</p></div></li>
+    </ol>
+  </section>
+
+  <section data-protegido hidden>
+    <h2>O que precisamos de você</h2>
+    <form class="form-card" id="form" novalidate>
+      <div class="steps" id="steps" aria-label="Etapas do formulário"></div>
+      <div class="step-head"><h3 id="stepTitle" style="font-size:17px"></h3><span class="count" id="stepCount"></span></div>
+
+      <!-- 1. Contrato -->
+      <div class="panel" data-title="Dados para o contrato">
+        <p class="note">Usamos estes dados só para o contrato e a nota fiscal.</p>
+        <div class="field"><span class="lbl">O contrato será em nome de</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="tipo" id="tipoPJ" value="Empresa (CNPJ)" checked><span>Empresa (CNPJ)</span></label>
+            <label><input type="radio" name="tipo" id="tipoPF" value="Pessoa física (CPF)"><span>Pessoa física (CPF)</span></label>
+          </div>
+        </div>
+        <div class="group" data-pj>
+          <div class="field"><label for="razao">Razão social</label><input type="text" id="razao" data-k="Razão social"></div>
+          <div class="row">
+            <div class="field"><label for="cnpj">CNPJ</label><input type="text" id="cnpj" data-k="CNPJ" inputmode="numeric" placeholder="00.000.000/0000-00" data-doc="cnpj"><small></small></div>
+            <div class="field"><label for="fantasia">Nome fantasia</label><input type="text" id="fantasia" data-k="Nome fantasia"></div>
+          </div>
+          <p class="group-title">Representante legal (quem assina)</p>
+          <div class="row">
+            <div class="field"><label for="repNome">Nome completo</label><input type="text" id="repNome" data-k="Representante legal"></div>
+            <div class="field"><label for="repCargo">Cargo</label><input type="text" id="repCargo" data-k="Cargo do representante" placeholder="Sócio, diretor"></div>
+          </div>
+          <div class="field"><label for="repCpf">CPF do representante</label><input type="text" id="repCpf" data-k="CPF do representante" inputmode="numeric" placeholder="000.000.000-00" data-doc="cpf"><small></small></div>
+        </div>
+        <div class="group" data-pf hidden>
+          <div class="row">
+            <div class="field"><label for="pfNome">Nome completo</label><input type="text" id="pfNome" data-k="Nome completo"></div>
+            <div class="field"><label for="pfCpf">CPF</label><input type="text" id="pfCpf" data-k="CPF" inputmode="numeric" placeholder="000.000.000-00" data-doc="cpf"><small></small></div>
+          </div>
+        </div>
+        <p class="group-title">Endereço</p>
+        <div class="row">
+          <div class="field"><label for="cep">CEP</label><input type="text" id="cep" data-k="CEP" inputmode="numeric" placeholder="00000-000"></div>
+          <div class="field"><label for="cidade">Cidade / UF</label><input type="text" id="cidade" data-k="Cidade/UF" placeholder="Recife / PE"></div>
+        </div>
+        <div class="field"><label for="endereco">Rua, número, complemento e bairro</label><input type="text" id="endereco" data-k="Endereço"></div>
+        <p class="group-title">Cobrança</p>
+        <div class="row">
+          <div class="field"><label for="emailNf">E-mail para nota fiscal e cobrança</label><input type="email" id="emailNf" data-k="E-mail financeiro"></div>
+          <div class="field"><label for="venc">Melhor dia de vencimento</label>
+            <select id="venc" data-k="Dia de vencimento"><option value="">Escolha</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option></select></div>
+        </div>
+        <div class="field"><span class="lbl">Forma de pagamento</span>
+          <div class="chips" data-k="Forma de pagamento">
+            <label><input type="checkbox" id="pg1" value="Pix"><span>Pix</span></label>
+            <label><input type="checkbox" id="pg2" value="Boleto"><span>Boleto</span></label>
+            <label><input type="checkbox" id="pg3" value="Cartão de crédito"><span>Cartão de crédito</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Contato -->
+      <div class="panel" data-title="Contato" hidden>
+        <div class="row">
+          <div class="field"><label for="nome">Responsável pelo projeto</label><input type="text" id="nome" data-k="Responsável" autocomplete="name"></div>
+          <div class="field"><label for="cargo">Cargo</label><input type="text" id="cargo" data-k="Cargo"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="whats">WhatsApp</label><input type="tel" id="whats" data-k="WhatsApp" placeholder="(81) 9 0000-0000" autocomplete="tel"></div>
+          <div class="field"><label for="email">E-mail</label><input type="email" id="email" data-k="E-mail" autocomplete="email"></div>
+        </div>
+        <div class="field"><label for="aprova">Quem aprova as entregas?</label><input type="text" id="aprova" data-k="Quem aprova" placeholder="Nome e WhatsApp, se for outra pessoa"></div>
+        <div class="field"><span class="lbl">Melhor horário para a reunião de início</span>
+          <div class="chips" data-k="Horário da reunião">
+            <label><input type="checkbox" id="h1" value="Manhã"><span>Manhã</span></label>
+            <label><input type="checkbox" id="h2" value="Almoço"><span>Almoço</span></label>
+            <label><input type="checkbox" id="h3" value="Tarde"><span>Tarde</span></label>
+            <label><input type="checkbox" id="h4" value="Fim do dia"><span>Fim do dia</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Negócio -->
+      <div class="panel" data-title="Sobre o negócio" hidden>
+        <div class="field"><label for="segmento">Segmento</label><input type="text" id="segmento" data-k="Segmento" placeholder="Ex.: barbearia, consultoria ambiental, clínica"></div>
+        <div class="field"><label for="vende">O que vocês vendem e o que mais querem vender agora</label><textarea id="vende" data-k="Produtos e serviços"></textarea></div>
+        <div class="field"><label for="publico">Quem é o cliente ideal?</label><textarea id="publico" data-k="Cliente ideal"></textarea></div>
+        <div class="row">
+          <div class="field"><label for="insta">Instagram</label><input type="text" id="insta" data-k="Instagram" placeholder="@perfil"></div>
+          <div class="field"><label for="site">Site</label><input type="url" id="site" data-k="Site" placeholder="https://"></div>
+        </div>
+        <div class="field"><label for="drive">Link da pasta com logo, fotos e materiais</label><input type="url" id="drive" data-k="Pasta de materiais" placeholder="Google Drive, Dropbox ou WeTransfer"><small>Também pode mandar direto no WhatsApp depois.</small></div>
+        <div class="field"><label for="ferramentas">Ferramentas que usam hoje</label><input type="text" id="ferramentas" data-k="Ferramentas atuais" placeholder="Ex.: WhatsApp Business, planilhas, sistema de agendamento"></div>
+      </div>
+
+      <!-- 4. Acessos -->
+      <div class="panel" data-title="Projeto e acessos" hidden>
+        <div class="field"><span class="lbl">O que entra no projeto</span><small>Marque o que foi combinado na proposta.</small>
+          <div class="chips" data-k="Serviços contratados" id="servicos">
+            <label><input type="checkbox" id="s1" value="Instagram" data-ig><span>Instagram</span></label>
+            <label><input type="checkbox" id="s2" value="Agente de IA no WhatsApp"><span>Agente de IA no WhatsApp</span></label>
+            <label><input type="checkbox" id="s3" value="Agente na DM e comentários" data-ig><span>Agente na DM e comentários</span></label>
+            <label><input type="checkbox" id="s4" value="Automação de processos"><span>Automação de processos</span></label>
+            <label><input type="checkbox" id="s5" value="Site"><span>Site</span></label>
+            <label><input type="checkbox" id="s6" value="App"><span>App</span></label>
+          </div>
+        </div>
+        <div class="howto" id="igHow" hidden>
+          <p><b>Acesso ao Instagram, sem passar senha</b></p>
+          <ol>
+            <li>Abra o <b>Meta Business Suite</b> (business.facebook.com) com a conta que administra o Instagram.</li>
+            <li>Vá em <b>Configurações → Pessoas</b> e clique em <b>Adicionar pessoa</b>.</li>
+            <li>Coloque o e-mail abaixo e dê acesso ao <b>Instagram</b> e à <b>Página do Facebook</b>.</li>
+          </ol>
+          <div class="mail"><code id="mailAddr">sinapsyia.oficial@gmail.com</code><button type="button" class="btn small" id="copyMail">Copiar e-mail</button></div>
+          <label class="check"><input type="checkbox" id="acessoOk" data-k="Acesso no Meta Business liberado"><span>Já adicionei a SinapsyIA no Meta Business</span></label>
+        </div>
+        <div class="field"><label for="tecnico">Quem cuida da parte técnica do seu lado?</label><input type="text" id="tecnico" data-k="Contato técnico" placeholder="Nome e contato (pode ser você)"></div>
+        <div class="field"><label for="acessos">Outros acessos que vamos precisar</label><textarea id="acessos" data-k="Outros acessos" placeholder="Ex.: número de WhatsApp que o agente vai usar, domínio do site, sistema atual"></textarea></div>
+        <p class="note">Nunca peça nem mande senhas por aqui. Os acessos são liberados por convite, e o que precisar de senha a gente faz junto na reunião.</p>
+      </div>
+
+      <!-- 5. Atendimento e conteúdo -->
+      <div class="panel" data-title="Tom e atendimento" hidden>
+        <div class="field"><span class="lbl">Como a sua marca deve soar?</span>
+          <div class="chips" data-k="Tom de voz">
+            <label><input type="checkbox" id="t1" value="Técnico e confiável"><span>Técnico e confiável</span></label>
+            <label><input type="checkbox" id="t2" value="Próximo e simples"><span>Próximo e simples</span></label>
+            <label><input type="checkbox" id="t3" value="Descontraído"><span>Descontraído</span></label>
+            <label><input type="checkbox" id="t4" value="Educativo"><span>Educativo</span></label>
+            <label><input type="checkbox" id="t5" value="Sofisticado"><span>Sofisticado</span></label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="refs">Marcas ou perfis que vocês admiram</label><input type="text" id="refs" data-k="Referências"></div>
+          <div class="field"><label for="evitar">O que não pode aparecer ou ser dito</label><input type="text" id="evitar" data-k="Evitar"></div>
+        </div>
+        <div class="field"><label for="humano">Assuntos que devem ir direto para uma pessoa</label><textarea id="humano" data-k="Passar para humano" placeholder="Ex.: orçamento grande, reclamação, cancelamento"></textarea></div>
+        <div class="row">
+          <div class="field"><label for="leads">Quem recebe os contatos novos?</label><input type="text" id="leads" data-k="Quem recebe os leads" placeholder="Nome e WhatsApp"></div>
+          <div class="field"><label for="atend">Horário de atendimento da equipe</label><input type="text" id="atend" data-k="Horário de atendimento" placeholder="Ex.: seg a sex, 8h às 18h"></div>
+        </div>
+        <div class="field"><label for="obs">Algo mais que a gente deveria saber?</label><textarea id="obs" data-k="Observações"></textarea></div>
+      </div>
+
+      <!-- 6. Revisar -->
+      <div class="panel" data-title="Revisar e enviar" hidden>
+        <p class="muted">Confira o resumo e clique em <b>Enviar para a SinapsyIA</b>. As respostas chegam direto para a nossa equipe. Se o envio falhar, use Copiar respostas e mande na DM do Instagram @sinapsyia ou para sinapsyia.oficial@gmail.com.</p>
+        <div class="summary" id="summary" tabindex="0"></div>
+        <div class="actions">
+          <button type="button" class="btn primary" id="sendDb">Enviar para a SinapsyIA</button>
+          <button type="button" class="btn" id="copyAll">Copiar respostas</button>
+          <a class="btn" id="sendIg" href="https://ig.me/m/sinapsyia" target="_blank" rel="noopener" style="text-decoration:none" hidden>Copiar e abrir o Instagram</a>
+        </div>
+        <p class="toast" id="toast" role="status"></p>
+      </div>
+
+      <div class="nav">
+        <button type="button" class="btn" id="prev">Voltar</button>
+        <span class="saved" id="saved"></span>
+        <button type="button" class="btn primary" id="next">Continuar</button>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    <p><b style="color:var(--fg)">SinapsyIA</b> · Instagram @sinapsyia · sinapsyia.oficial@gmail.com</p>
+    <p>Dúvidas em qualquer etapa? Chama a gente na DM do Instagram.</p>
+  </footer>
+</div>
+
+<link rel="icon" type="image/svg+xml" href="../assets/logo-mark.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../ferramentas/config.js"></script>
+<script src="../ferramentas/sinapsy-runtime.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const form = $("form");
+  const panels = [...form.querySelectorAll(".panel")];
+  const stepsEl = $("steps");
+  let cur = 0;
+
+  // Nome do cliente pelo link: ...#acto-barber -> "Acto Barber"
+  function clientName(){
+    const h = decodeURIComponent((location.hash||"").slice(1)).trim();
+    if(!/^[A-Za-z0-9-]+$/.test(h)) return "";
+    return h.split("-").filter(Boolean).map(w=>w.length<=2&&w===w.toUpperCase()?w:w[0].toUpperCase()+w.slice(1)).join(" ");
+  }
+  const CLIENT = clientName();
+  const KEY = "onboarding-sinapsyia-v1" + (CLIENT ? "-" + CLIENT.toLowerCase() : "");
+  function applyClient(){
+    const n = clientName();
+    $("brandClient").textContent = n ? "× " + n : "";
+    const h = $("hello"); h.textContent = "";
+    h.append(n ? "Que bom ter a " : "Que bom ter você com a ");
+    const em = document.createElement("em"); em.textContent = n || "gente"; h.append(em);
+    h.append(n ? " com a gente." : ".");
+    document.title = n ? "Onboarding " + n + " · SinapsyIA" : "Onboarding SinapsyIA";
+  }
+
+  panels.forEach((p,i)=>{
+    const b=document.createElement("button");b.type="button";b.setAttribute("aria-label","Etapa "+(i+1)+": "+p.dataset.title);
+    b.addEventListener("click",()=>go(i));stepsEl.appendChild(b);
+  });
+  function go(i){
+    cur=Math.max(0,Math.min(panels.length-1,i));
+    panels.forEach((p,j)=>p.hidden=j!==cur);
+    [...stepsEl.children].forEach((b,j)=>{b.className=j<cur?"done":j===cur?"cur":"";});
+    $("stepTitle").textContent=panels[cur].dataset.title;
+    $("stepCount").textContent="Etapa "+(cur+1)+" de "+panels.length;
+    $("prev").style.visibility=cur===0?"hidden":"visible";
+    $("next").hidden=cur===panels.length-1;
+    if(cur===panels.length-1) $("summary").textContent=buildText();
+  }
+  const jump=d=>{go(cur+d);form.scrollIntoView({behavior:"smooth",block:"start"})};
+  $("prev").onclick=()=>jump(-1); $("next").onclick=()=>jump(1);
+
+  // PF / PJ
+  function syncTipo(){
+    const pf=$("tipoPF").checked;
+    form.querySelector("[data-pf]").hidden=!pf;
+    form.querySelector("[data-pj]").hidden=pf;
+  }
+  // Mostrar passo a passo do Instagram
+  function syncIg(){ $("igHow").hidden=!form.querySelector("#servicos [data-ig]:checked"); }
+
+  // Máscara e validação de CPF / CNPJ
+  const digits=v=>v.replace(/\D/g,"");
+  function maskCpf(d){d=d.slice(0,11);return d.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})\.(\d{3})(\d)/,"$1.$2.$3").replace(/\.(\d{3})(\d{1,2})$/,".$1-$2");}
+  function maskCnpj(d){d=d.slice(0,14);return d.replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3").replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d{1,2})$/,"$1-$2");}
+  function validCpf(d){
+    if(d.length!==11||/^(\d)\1+$/.test(d))return false;
+    for(let t=9;t<11;t++){let s=0;for(let i=0;i<t;i++)s+=+d[i]*(t+1-i);if(((s*10)%11)%10!==+d[t])return false;}
+    return true;
+  }
+  function validCnpj(d){
+    if(d.length!==14||/^(\d)\1+$/.test(d))return false;
+    const calc=n=>{let s=0,p=n-7;for(let i=0;i<n;i++){s+=+d[i]*p--;if(p<2)p=9;}const r=s%11;return r<2?0:11-r;};
+    return calc(12)===+d[12]&&calc(13)===+d[13];
+  }
+  function checkDoc(el){
+    const kind=el.dataset.doc, d=digits(el.value), hint=el.parentElement.querySelector("small");
+    el.value = kind==="cpf"?maskCpf(d):maskCnpj(d);
+    const full = kind==="cpf"?d.length===11:d.length===14;
+    if(!d.length){hint.textContent="";hint.className="";return;}
+    if(!full){hint.textContent="";hint.className="";return;}
+    const ok = kind==="cpf"?validCpf(d):validCnpj(d);
+    hint.textContent = ok?(kind==="cpf"?"CPF válido":"CNPJ válido"):(kind==="cpf"?"Esse CPF não parece válido. Confira os números.":"Esse CNPJ não parece válido. Confira os números.");
+    hint.className = ok?"good":"bad";
+  }
+  form.querySelectorAll("[data-doc]").forEach(el=>el.addEventListener("input",()=>checkDoc(el)));
+  $("cep").addEventListener("input",e=>{const d=digits(e.target.value).slice(0,8);e.target.value=d.length>5?d.slice(0,5)+"-"+d.slice(5):d;});
+
+  function isVisible(el){for(let n=el;n&&n!==form;n=n.parentElement){if(n.hidden&&!n.classList.contains("panel"))return false;}return true;}
+  function collect(){
+    const out=[];
+    panels.slice(0,-1).forEach((p,i)=>{
+      const sec={title:p.dataset.title,items:[]};
+      if(i===0) sec.items.push(["Contrato em nome de",form.querySelector("input[name=tipo]:checked").value]);
+      p.querySelectorAll("[data-k]").forEach(el=>{
+        if(!isVisible(el))return;
+        const k=el.dataset.k;
+        if(el.classList.contains("chips")) sec.items.push([k,[...el.querySelectorAll("input:checked")].map(x=>x.value).join(", ")]);
+        else if(el.type==="checkbox") sec.items.push([k,el.checked?"Sim":"Ainda não"]);
+        else sec.items.push([k,el.value.trim()]);
+      });
+      out.push(sec);
+    });
+    return out;
+  }
+  function buildText(){
+    let t="*Onboarding "+(clientName()||"novo cliente")+" · SinapsyIA*\n";
+    collect().forEach(s=>{t+="\n*"+s.title+"*\n";s.items.forEach(([k,v])=>{t+="• "+k+": "+(v||"—")+"\n";});});
+    return t;
+  }
+
+  // Rascunho no navegador
+  function save(){
+    const data={};
+    form.querySelectorAll("input,textarea,select").forEach(el=>{if(el.id)data[el.id]=(el.type==="checkbox"||el.type==="radio")?el.checked:el.value;});
+    try{localStorage.setItem(KEY,JSON.stringify(data));$("saved").textContent="Rascunho salvo";}catch(e){}
+  }
+  function load(){
+    try{
+      const data=JSON.parse(localStorage.getItem(KEY)||"null");if(!data)return;
+      form.querySelectorAll("input,textarea,select").forEach(el=>{
+        if(!el.id||!(el.id in data))return;
+        if(el.type==="checkbox"||el.type==="radio")el.checked=!!data[el.id];else el.value=data[el.id];
+      });
+      form.querySelectorAll("[data-doc]").forEach(checkDoc);
+      $("saved").textContent="Rascunho recuperado";
+    }catch(e){}
+  }
+  let tmr;
+  form.addEventListener("input",()=>{clearTimeout(tmr);tmr=setTimeout(save,400)});
+  form.addEventListener("change",()=>{syncTipo();syncIg();save();});
+  form.addEventListener("submit",e=>e.preventDefault());
+
+  function toast(msg){const t=$("toast");t.textContent=msg;setTimeout(()=>{if(t.textContent===msg)t.textContent=""},5000);}
+  function selectEl(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}
+  $("copyAll").onclick=()=>{
+    const fb=()=>{selectEl($("summary"));toast("Texto selecionado. Use Ctrl+C para copiar.");};
+    try{navigator.clipboard.writeText(buildText()).then(()=>toast("Respostas copiadas."),fb);}catch(e){fb();}
+  };
+  $("copyMail").onclick=e=>{
+    const fb=()=>selectEl($("mailAddr"));
+    try{navigator.clipboard.writeText($("mailAddr").textContent).then(()=>{e.target.textContent="Copiado"},fb);}catch(_){fb();}
+  };
+  // Copia as respostas e deixa o link abrir a DM da @sinapsyia
+  $("sendIg").addEventListener("click",()=>{
+    const fb=()=>{selectEl($("summary"));toast("Não deu para copiar sozinho. Selecionei o texto: use Ctrl+C e cole na DM.");};
+    try{navigator.clipboard.writeText(buildText()).then(()=>toast("Respostas copiadas. Cole na conversa do Instagram e envie."),fb);}catch(e){fb();}
+  });
+  // Envia direto para o banco da SinapsyIA (Supabase). Se falhar, mostra o plano B (Instagram).
+  function nomeCliente(){
+    for(const id of ["razao","fantasia","pfNome","nome"]){const el=$(id);if(el&&el.value.trim()&&isVisible(el))return el.value.trim();}
+    return clientName()||"";
+  }
+  $("sendDb").addEventListener("click",async()=>{
+    const b=$("sendDb"); if(b.disabled)return;
+    b.disabled=true; b.textContent="Enviando…";
+    let ok=false;
+    try{
+      const db=window.claude?await window.claude.use("db"):null;
+      if(db){
+        await db.collection("onboarding").add({link:clientName()||"",nome:nomeCliente(),acesso:ACESSO||null,secoes:collect(),texto:buildText(),criadoEm:Date.now()});
+        ok=true;
+      }
+    }catch(e){}
+    if(ok){
+      b.textContent="Enviado ✓";
+      toast("Recebemos suas respostas! A SinapsyIA vai falar com você em breve.");
+      try{localStorage.removeItem(KEY);}catch(e){}
+      $("saved").textContent="";
+    }else{
+      b.disabled=false; b.textContent="Tentar enviar de novo";
+      $("sendIg").hidden=false;
+      toast("Não consegui enviar agora. Tente de novo, ou copie as respostas e mande no Instagram.");
+    }
+  });
+
+  // Portão do código de acesso (o mesmo código vale no Diagnóstico e na Criação de App)
+  let ACESSO="";
+  const AC=window.SinapsyAcesso;
+  function liberar(){ $("gate").hidden=true; $("gateWait").hidden=true; document.querySelectorAll("[data-protegido]").forEach(s=>s.hidden=false); }
+  function pedirCodigo(msg){ $("gateWait").hidden=true; $("gate").hidden=false; $("gateMsg").textContent=msg||""; }
+  async function entrar(){
+    const v=$("gateCode").value, b=$("gateGo");
+    if(!AC||AC.norm(v).length<4){ $("gateMsg").textContent="Digite o código que a SinapsyIA te enviou."; return; }
+    b.disabled=true; $("gateMsg").textContent="Conferindo…";
+    const ok=await AC.conferir(v); b.disabled=false;
+    if(ok){ ACESSO=AC.norm(v); AC.guardar(v); liberar(); }
+    else $("gateMsg").textContent = ok===null ? "Não consegui conferir agora. Verifique a internet e tente de novo." : "Código inválido ou desativado. Confira ou peça um novo à SinapsyIA no Instagram @sinapsyia.";
+  }
+  $("gateGo").onclick=entrar;
+  $("gateCode").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();entrar();}});
+  (async()=>{
+    try{ const s=window.SinapsyAuth&&await window.SinapsyAuth.sessao(); if(s){ liberar(); return; } }catch(e){}
+    const salvo=AC&&AC.salvo();
+    if(salvo && await AC.conferir(salvo)===true){ ACESSO=salvo; liberar(); return; }
+    if(salvo) AC.guardar("");
+    pedirCodigo();
+  })();
+
+  window.addEventListener("hashchange",()=>{applyClient();if(cur===panels.length-1)$("summary").textContent=buildText();});
+  applyClient();load();syncTipo();syncIg();go(0);
+})();
+</script>

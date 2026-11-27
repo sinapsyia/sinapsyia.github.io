@@ -1,0 +1,1019 @@
+<title>Brainstorm de App Sinapsy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column of steps (Ideia → Perguntas → PRD e prompts) under a sticky progress bar; the result widens with tabs. Dark-only, SinapsyIA brand (same as the Diagnóstico). */
+:root{
+  --bg:#0B1020; --surface:#11182F; --surface-2:#18213F; --line:rgba(160,170,230,.16); --line-strong:rgba(160,170,230,.32);
+  --fg:#E9ECFB; --muted:#9BA3C6; --faint:#6B739A;
+  --violet:#8B5CF6; --cyan:#22D3EE; --ok:#34D399; --warn:#FBBF24; --danger:#F87171;
+  --grad:linear-gradient(135deg,#7C3AED 0%,#06B6D4 100%);
+  --display:'Poppins',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --body:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --r:14px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:780px;margin:0 auto}
+.wrap.wide{max-width:1000px}
+h1,h2,h3{font-family:var(--display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:600}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);font-weight:600}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+.top-in{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:16px}
+.steps{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.st{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px}
+.st b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;border:1px solid var(--line-strong);font-weight:600}
+.st.on{color:var(--fg)} .st.on b{background:var(--grad);border-color:transparent;color:#fff}
+.st.done b{background:var(--surface-2);color:var(--cyan);border-color:var(--cyan)}
+.st + .st::before{content:"";width:14px;height:1px;background:var(--line-strong);margin-right:2px}
+.mode{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid var(--line-strong);color:var(--muted)}
+.mode.ia{border-color:rgba(34,211,238,.5);color:var(--cyan)}
+
+main{padding-top:36px;display:flex;flex-direction:column;gap:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+@media (max-width:480px){.card{padding:18px}}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.notice{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.07);color:#FDE68A;border-radius:10px;padding:10px 14px;font-size:13.5px}
+
+.hero{display:flex;flex-direction:column;gap:14px;padding-top:8px}
+.hero p.lead{font-size:17px;color:var(--muted);max-width:60ch}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:6px 0 0;padding:0;list-style:none;counter-reset:how}
+.how li{counter-increment:how;border-top:1px solid var(--line-strong);padding-top:10px;font-size:13.5px;color:var(--muted)}
+.how li::before{content:counter(how);display:block;font-family:var(--display);font-weight:600;color:var(--fg);font-size:14px;margin-bottom:2px}
+.how li strong{color:var(--fg);font-weight:600}
+@media (max-width:620px){.how{grid-template-columns:1fr}}
+.stack-tags{display:flex;gap:6px;flex-wrap:wrap}
+.stack-tags span{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:500}
+label.f small{color:var(--faint);font-weight:400}
+input[type=text],textarea{background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;padding:11px 12px;width:100%;min-width:0}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+input:focus,textarea:focus{border-color:var(--cyan);outline:none}
+.btn{border:0;border-radius:10px;padding:12px 20px;font-weight:600;cursor:pointer;background:var(--grad);color:#fff;font-family:var(--display);font-size:14.5px;letter-spacing:.01em;text-decoration:none;display:inline-block}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid var(--line-strong);color:var(--fg);font-family:var(--body);font-weight:500}
+.btn.ghost:hover{border-color:var(--muted)}
+.btn.sm{padding:8px 12px;font-size:13px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:4px}
+.err{color:var(--danger);font-size:13px}
+.okmsg{color:var(--ok);font-size:13.5px}
+
+.busy{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.busy small{display:block;color:var(--faint);font-size:12.5px}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--cyan);animation:sp .9s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.live{font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:340px;overflow:auto;white-space:pre-wrap;word-break:break-word;margin:0}
+
+.reading{border-left:3px solid var(--violet);padding:4px 0 4px 14px;font-size:16px}
+
+/* questions */
+.quick{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.quick input{flex:1 1 220px;font-family:var(--mono);font-size:13.5px}
+.qs{display:flex;flex-direction:column;gap:14px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px}
+.q-h{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start}
+.q-n{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--surface-2);font-family:var(--display);font-weight:600;font-size:14px;color:var(--cyan)}
+.q-t{display:flex;flex-direction:column;gap:2px}
+.q-t .tema{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.q-t h3{font-size:16px;line-height:1.35}
+.opts{display:flex;flex-direction:column;gap:6px;padding-left:42px}
+@media (max-width:520px){.opts{padding-left:0}}
+.opt{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .l{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.opt .tx{font-size:14.5px}
+.opt .rec{font-size:11px;color:var(--cyan);font-weight:600;margin-left:6px;white-space:nowrap}
+.opt:has(input:checked){border-color:var(--cyan);background:rgba(34,211,238,.07)}
+.opt:has(input:checked) .l{background:var(--cyan);border-color:var(--cyan);color:#0B1020;font-weight:600}
+.opt:has(input:focus-visible){outline:2px solid var(--cyan);outline-offset:2px}
+.opt input[type=text]{position:static;opacity:1;pointer-events:auto;margin-top:8px;padding:8px 10px}
+
+/* result */
+.res-head{display:flex;flex-direction:column;gap:10px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.decide{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.06);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.decide h3{color:var(--warn);font-size:15px}
+.decide .md-body{font-size:14px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:600;white-space:nowrap;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--fg);border-bottom-color:var(--cyan)}
+.tab .c{font-size:11px;background:var(--surface-2);border-radius:99px;padding:1px 7px;margin-left:6px;color:var(--muted)}
+
+.md-body{min-width:0;overflow-wrap:anywhere}
+.md-body > *:first-child{margin-top:0}
+.md-body h1{font-size:26px;margin:0 0 12px}
+.md-body h2{font-size:19px;margin:30px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.md-body h3{font-size:15.5px;margin:20px 0 8px;color:var(--cyan)}
+.md-body p{margin:0 0 10px;max-width:72ch}
+.md-body ul,.md-body ol{margin:0 0 12px;padding-left:22px;max-width:72ch}
+.md-body li{margin:3px 0}
+.md-body strong{color:#fff}
+.md-body code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+.md-body pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+.md-body pre code{background:none;padding:0}
+.md-body table{border-collapse:collapse;font-size:13.5px;margin:0 0 14px;display:block;overflow-x:auto;max-width:100%}
+.md-body th,.md-body td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.md-body th{background:var(--surface-2)}
+.md-body blockquote{margin:0 0 12px;border-left:3px solid var(--violet);padding-left:12px;color:var(--muted)}
+.md-body hr{border:0;border-top:1px solid var(--line);margin:20px 0}
+pre.raw{white-space:pre-wrap;font-family:var(--mono);font-size:13px}
+
+.prompts{display:flex;flex-direction:column;gap:14px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pcard.done{opacity:.7}
+.pc-h{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.pc-n{font-family:var(--mono);font-size:12px;color:var(--cyan);font-weight:500}
+.pc-h h3{flex:1 1 200px;min-width:0}
+.pc-b{font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;padding:16px;margin:0;color:#CDD2EE;max-height:320px;overflow:auto;background:var(--bg)}
+.pc-f{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 16px}
+.tog{display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer;color:var(--muted)}
+.tog input{accent-color:var(--cyan);width:17px;height:17px}
+.progress{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--grad)}
+
+.cta{border-radius:18px;padding:26px;background:var(--grad);color:#fff;display:flex;flex-direction:column;gap:12px}
+.cta .eyebrow{color:rgba(255,255,255,.85)}
+.cta h2{font-size:clamp(22px,4vw,28px);font-weight:700}
+.cta .btn.ghost{border-color:rgba(255,255,255,.6);color:#fff}
+.cta .btn.light{background:#fff;color:#4C1D95}
+.handle{font-family:var(--display);font-weight:600;user-select:all}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.badge.new{color:#0B1020;background:var(--cyan)}
+.badge.done{color:var(--ok);background:rgba(52,211,153,.12)}
+.share textarea{min-height:170px;font-size:12.5px;font-family:var(--mono)}
+.saved{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.srow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);background:var(--bg)}
+.srow:last-child{border-bottom:0}
+.sopen{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:0;padding:4px 14px;cursor:pointer}
+.sopen .nm{font-weight:600;font-family:var(--display)}
+.sopen .meta{font-size:12.5px;color:var(--muted)}
+.sopen:hover .nm{color:var(--cyan)}
+footer.foot{text-align:center;color:var(--faint);font-size:12.5px;padding-top:12px}
+.acc{max-width:540px;margin:24px auto 0;width:100%}
+.acc h1{font-size:clamp(24px,4vw,32px)}
+.codrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:12px;align-items:end}
+@media (max-width:640px){.codrow{grid-template-columns:1fr}}
+.codetag{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;font-weight:500;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:6px;padding:1px 7px;margin-right:8px;letter-spacing:.04em}
+</style>
+
+<div class="top"><div class="top-in" id="top"></div></div>
+<main id="app" class="wrap"></main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="../assets/logo-mark.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../ferramentas/config.js"></script>
+<script src="../ferramentas/sinapsy-runtime.js"></script>
+<script>
+(function(){
+'use strict';
+
+const IG = 'https://ig.me/m/sinapsyia';
+const PERMANENT = ['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
+
+/* ---------- Perguntas padrão (modo guiado, sem IA) ---------- */
+const QPAD = [
+  {tema:'Público e uso', k:'publico', pergunta:'Para quem é o app?', opcoes:[['a','Uso próprio ou da minha empresa'],['b','Para um cliente meu'],['c','Um produto para vender por assinatura']], rec:'a'},
+  {tema:'Público e uso', k:'uso', pergunta:'Quem vai usar no dia a dia?', opcoes:[['a','Só uma pessoa'],['b','Uma equipe pequena, cada um com seu login'],['c','Equipe interna e também os clientes finais']], rec:'b'},
+  {tema:'Problema e objetivo', k:'objetivo', pergunta:'Qual é o trabalho principal do app no MVP?', opcoes:[['a','Organizar e controlar informações (cadastros, status, histórico)'],['b','Receber pedidos ou vendas'],['c','Agendar e atender clientes'],['d','Gerar conteúdo ou respostas com IA']], rec:'a'},
+  {tema:'Estrutura', k:'estrutura', pergunta:'Como o conteúdo se organiza?', opcoes:[['a','Uma lista simples de itens'],['b','Projetos que agrupam itens'],['c','Workspaces → projetos → itens']], rec:'b'},
+  {tema:'Colaboração', k:'colab', pergunta:'Precisa compartilhar com outras pessoas?', opcoes:[['a','Não, cada usuário vê só o que é dele'],['b','Sim, convites por e-mail com permissão de ver ou editar'],['c','Sim, um link público só de leitura']], rec:'a'},
+  {tema:'Dados e segurança', k:'login', pergunta:'Como as pessoas entram no app?', opcoes:[['a','E-mail e senha'],['b','E-mail e senha + login com Google'],['c','Sem login (app aberto)']], rec:'a'},
+  {tema:'Dados e segurança', k:'uploads', pergunta:'O app precisa guardar arquivos?', opcoes:[['a','Não'],['b','Sim, imagens e PDFs simples'],['c','Sim, muitos arquivos ou arquivos grandes']], rec:'b'},
+  {tema:'Integrações e IA', k:'integ', pergunta:'Alguma integração já no MVP?', opcoes:[['a','Nenhuma, fica para a v2'],['b','IA para gerar ou resumir textos'],['c','Pagamento online (Stripe)'],['d','Avisos por e-mail ou WhatsApp']], rec:'a'},
+  {tema:'Plataforma', k:'plat', pergunta:'Onde o app vai ser mais usado?', opcoes:[['a','Computador (desktop primeiro)'],['b','Celular (mobile primeiro, responsivo)'],['c','Os dois na mesma medida']], rec:'c'},
+  {tema:'Visual', k:'visual', pergunta:'Que estilo de interface combina?', opcoes:[['a','Limpo e profissional, fundo claro'],['b','Moderno e escuro'],['c','Colorido e descontraído']], rec:'a'}
+].map(q=>({tema:q.tema,k:q.k,pergunta:q.pergunta,opcoes:q.opcoes.map(o=>({l:o[0],t:o[1]})),rec:q.rec}));
+
+const EXEMPLO = {nome:'AgendaPet', descricao:'App para pet shops organizarem banho e tosa. O tutor agenda pelo celular escolhendo serviço e horário, a equipe vê a agenda do dia e marca quando o pet está pronto (o tutor recebe o aviso), e o dono acompanha o faturamento da semana.', referencias:'Parecido com o Calendly, mas com cadastro do pet (raça, porte, observações).'};
+
+/* ---------- Estado ---------- */
+const KEY='sinapsy-brainstorm-v1';
+function fresh(){return {step:'ideia',mode:null,ideia:{nome:'',descricao:'',referencias:''},contato:{nome:'',contato:''},resumo:'',perguntas:[],resp:{},prd:'',prompts:[],colados:{},tab:'prd',truncated:false,notice:'',savedId:null,envioId:null,sent:null,prevStep:null};}
+function load(){try{const r=localStorage.getItem(KEY);if(!r)return null;const s=JSON.parse(r);return s&&s.step?Object.assign(fresh(),s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+let S = load() || fresh();
+if(S.step==='gerando') S.step = S.prd ? 'resultado' : (S.perguntas.length?'perguntas':'ideia');
+let BUSY=null, CTL=null, FORM_ERR='', LIVE='', MSG='';
+
+const str = v => (typeof v==='string'?v:'').trim();
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug = s => (str(s)||'app').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'app';
+
+/* ---------- Dono x visitante (user + db) ----------
+   Visitante: responde as perguntas e toca em "Salvar" -> as respostas vão para a coleção "envios".
+   Dono: vê os envios em "Meus PRDs", gera o PRD e salva na coleção "prds". */
+let USER=null, OWNER=false, OWNER_CHECKED=false, DB=null, PRDS=null, ENVIOS=null, DB_ERR='', IMPORT_TXT='', PANEL_MSG='', PANEL_ERR=false;
+(async()=>{
+  try{
+    if(!(window.claude && typeof window.claude.use==='function')) return;
+    const [user, db] = await Promise.all([window.claude.use('user').catch(()=>null), window.claude.use('db').catch(()=>null)]);
+    DB=db; USER=user;
+    let own=false; if(user){ try{ own=!!(await Promise.resolve(user.isOwner())); }catch(e){} }
+    OWNER=own;
+    if(OWNER && DB) subscribe();
+    else await initAcesso();
+  } finally { OWNER_CHECKED=true; render(); }
+})();
+function subscribe(){
+  const timer=setTimeout(()=>{ if(PRDS===null||ENVIOS===null){ DB_ERR='Ainda não consegui carregar o painel. Verifique sua conexão.'; if(S.step==='painel') render(); } },10000);
+  const upd=()=>{ if(PRDS!==null && ENVIOS!==null){ clearTimeout(timer); DB_ERR=''; if(abrirDoLink()) return; } renderTop(); if(S.step==='painel') render(); };
+  const fail=()=>{ clearTimeout(timer); DB_ERR='Não foi possível acessar o painel.'; if(S.step==='painel') render(); };
+  DB.collection('prds').onSnapshot(snap=>{ PRDS=snap.docs.map(d=>Object.assign({}, d.data(), {id:d.id})); upd(); }, fail);
+  DB.collection('envios').onSnapshot(snap=>{ ENVIOS=snap.docs.map(d=>Object.assign({}, d.data(), {id:d.id})); upd(); }, fail);
+  subscribeCodigos(()=>{ if(S.step==='painel') render(); });
+}
+
+/* ---------- Envio das respostas (visitante) ---------- */
+function b64enc(s){ return btoa(unescape(encodeURIComponent(s))); }
+function b64dec(s){ return decodeURIComponent(escape(atob(s))); }
+function envioDoc(origem){
+  return {nome:str(S.ideia.nome)||'Sem nome', contato:{nome:str(S.contato.nome),contato:str(S.contato.contato)}, ideia:S.ideia, resumo:S.resumo, perguntas:S.perguntas, resp:S.resp, acesso:ACC.hash||null, origem, criadoEm:Date.now()};
+}
+function packCode(){ return 'SNPB1.'+b64enc(JSON.stringify({c:S.contato,i:S.ideia,r:S.resumo,q:S.perguntas,a:S.resp}))+'.'; }
+function unpack(text){
+  const m=String(text||'').replace(/\s+/g,'').match(/SNPB1\.([A-Za-z0-9+/=]+)\./);
+  if(!m) return null;
+  try{ const p=JSON.parse(b64dec(m[1])); return p && p.i && Array.isArray(p.q) ? p : null; }catch(e){ return null; }
+}
+function envioMsg(){
+  return `Olá, Sinapsy! Fiz o brainstorm do meu app e quero o PRD.\n\nNome: ${S.contato.nome}\nContato: ${S.contato.contato}\nApp: ${S.ideia.nome||'(sem nome)'}\n${S.resumo||S.ideia.descricao}\n\nMinhas respostas:\n${S.perguntas.map((q,i)=>`- ${q.pergunta} ${answerOf(i).txt}`).join('\n')}\n\nCódigo das respostas (não apague):\n${packCode()}\n`;
+}
+async function enviar(btn){
+  btn.disabled=true; btn.textContent='Salvando…';
+  let ok=false;
+  // Cada visitante grava no próprio documento (envios/<id do visitante>); só o dono lê.
+  if(DB && USER){ try{ const uid=await USER.id(); if(uid){ await DB.collection('envios').doc(uid).set(envioDoc('enviado pelo site')); ok=true; } }catch(e){} }
+  S.sent = ok ? 'db' : 'code'; S.step='enviado'; S.notice=''; save(); render(); window.scrollTo({top:0});
+}
+function normQs(arr){
+  return (Array.isArray(arr)?arr:[]).filter(q=>q&&typeof q==='object'&&Array.isArray(q.opcoes)).slice(0,10).map(q=>({
+    tema:str(q.tema), k:str(q.k)||undefined, pergunta:str(q.pergunta),
+    opcoes:q.opcoes.slice(0,4).map((o,j)=>({l:str(o&&o.l)||'abcd'[j], t:str(o&&o.t)})).filter(o=>o.t), rec:str(q.rec)||'a'
+  })).filter(q=>q.pergunta&&q.opcoes.length);
+}
+function normResp(r){
+  const o={}; if(r&&typeof r==='object') Object.keys(r).forEach(k=>{ const v=r[k]; if(v&&typeof v==='object') o[k]={l:str(v.l),outro:str(v.outro)}; });
+  return o;
+}
+// Link do painel: #abrir=envios:<id>
+function abrirDoLink(){
+  const m=/^#abrir=envios:(.+)$/.exec(location.hash||''); if(!m) return false;
+  history.replaceState(null,'',location.pathname);
+  const d=(ENVIOS||[]).find(x=>x.id===decodeURIComponent(m[1])); if(!d) return false;
+  abrirEnvio(d); return true;
+}
+function abrirEnvio(d){
+  if(d.novo && DB) DB.collection('envios').doc(d.id).update({novo:false}).catch(()=>{});
+  const p=d.prdId && (PRDS||[]).find(x=>x.id===d.prdId);
+  if(p) openSaved(p); else openEnvio(d);
+}
+function openEnvio(d){
+  const n=fresh();
+  const i=d.ideia||{}; n.ideia={nome:str(i.nome),descricao:str(i.descricao),referencias:str(i.referencias)};
+  const c=d.contato||{}; n.contato={nome:str(c.nome),contato:str(c.contato)};
+  n.resumo=str(d.resumo); n.perguntas=normQs(d.perguntas); n.resp=normResp(d.resp);
+  n.envioId=d.id; n.step='perguntas'; n.prevStep='painel';
+  S=n; save(); render(); window.scrollTo({top:0});
+}
+function dbErr(e){ return e && e.code==='quota_exceeded' ? 'O espaço de armazenamento encheu. Apague PRDs antigos e tente de novo.' : 'Não consegui salvar agora. Tente de novo em instantes.'; }
+
+/* ---------- IA (capability sample) ---------- */
+const samplePromise = (window.claude && typeof window.claude.use==='function') ? window.claude.use('sample').catch(()=>null) : Promise.resolve(null);
+async function getSample(){
+  if(S.mode==='guiado') return null;
+  const s = await samplePromise;
+  if(!s){ S.mode='guiado'; return null; }
+  return s;
+}
+function errMsg(e){
+  const c=e&&e.code;
+  if(c==='rate_limited') return 'A IA está com muitos pedidos agora.';
+  if(c==='session_expired') return 'Sua sessão no Claude expirou.';
+  if(PERMANENT.includes(c)) return 'A IA não está liberada nesta visualização.';
+  return 'Não consegui falar com a IA agora.';
+}
+function ctxIdeia(){
+  const i=S.ideia;
+  return `Nome do app: ${i.nome||'(sem nome ainda)'}\nIdeia descrita pelo usuário:\n${i.descricao}\n${i.referencias?'\nMaterial extra que o usuário trouxe (referências, anotações, PRD):\n'+i.referencias+'\n':''}`;
+}
+function answerOf(i){
+  const q=S.perguntas[i], r=S.resp[i]||{};
+  if(r.l==='outro' && str(r.outro)) return {txt:str(r.outro), own:true};
+  const o=q.opcoes.find(o=>o.l===(r.l&&r.l!=='outro'?r.l:q.rec)) || q.opcoes[0];
+  return {txt:o?o.t:'', own:false};
+}
+function respostasTxt(){
+  return S.perguntas.map((q,i)=>`${i+1}. ${q.pergunta}\nResposta: ${answerOf(i).txt}`).join('\n\n');
+}
+
+async function run(label, fn){
+  BUSY=label; FORM_ERR=''; LIVE=''; render();
+  try{ await fn(); }
+  catch(e){ if(!(e && e.code==='cancelled') && !(e && e.name==='AbortError')) S.notice='Algo deu errado. Tente de novo.'; }
+  BUSY=null; CTL=null; LIVE=''; save(); render(); window.scrollTo({top:0});
+}
+function setLive(t){
+  LIVE=t;
+  const el=document.getElementById('live'); if(el){ el.textContent=t.length>2400?'…'+t.slice(-2400):t; el.scrollTop=el.scrollHeight; }
+  const c=document.getElementById('livecount'); if(c) c.textContent=t.length.toLocaleString('pt-BR')+' caracteres';
+}
+
+/* ---------- Passo 1 → 2: perguntas ---------- */
+async function gerarPerguntas(){
+  const i=S.ideia;
+  if(str(i.descricao).length<30){ FORM_ERR='Conte um pouco mais da ideia: o que o app faz e para quem (pelo menos duas frases).'; render(); return; }
+  if(!OWNER && (!str(S.contato.nome) || !str(S.contato.contato))){ FORM_ERR='Escreva seu nome e um WhatsApp ou Instagram para a gente falar com você.'; render(); return; }
+  S.notice='';
+  await run('Lendo a sua ideia e montando as perguntas…', async()=>{
+    const sample=await getSample();
+    let r=null;
+    if(sample){
+      CTL=new AbortController();
+      try{
+        r=await sample.json(`Você é product manager da SinapsyIA e vai conduzir o brainstorming de um app que será construído no Lovable (React + Vite + Tailwind + shadcn/ui + Supabase). O objetivo é um MVP que dá para construir rápido.
+
+${ctxIdeia()}
+Faça duas coisas:
+1) "resumo": uma frase em português do Brasil, começando com "Você quer", resumindo o app, para quem é e a dor que resolve.
+2) "perguntas": NO MÁXIMO 10 perguntas de decisão de escopo. Pergunte só o que muda decisões; o resto será decidido depois com o padrão mais sensato. Não pergunte o que já está respondido na ideia ou no material extra. Escolha entre estes temas os mais relevantes para ESTA ideia: público e uso; problema e objetivo do MVP; estrutura/hierarquia do conteúdo; funcionalidades do MVP (e o que fica para a v2); detalhe das funcionalidades centrais; colaboração e compartilhamento; dados, login e segurança; integrações e IA; plataforma (desktop, mobile, offline); monetização e visual.
+Cada pergunta: "tema" (até 3 palavras), "pergunta" (curta e direta, específica para este app), "opcoes" (2 a 4, cada uma com "l" = letra a, b, c ou d, e "t" = texto até 14 palavras) e "rec" = a letra da opção recomendada para um MVP enxuto. Quando uma opção inflar o escopo, deixe isso claro no texto dela.
+
+Responda só com JSON: {"resumo":"...","perguntas":[{"tema":"...","pergunta":"...","opcoes":[{"l":"a","t":"..."}],"rec":"a"}]}`,{signal:CTL.signal});
+        S.mode='ia';
+      }catch(e){
+        if(e && e.code==='cancelled') throw e;
+        if(PERMANENT.includes(e&&e.code)) S.mode='guiado';
+        S.notice=errMsg(e)+' Segui com as perguntas padrão da Sinapsy.';
+        r=null;
+      }
+    }
+    const qs = r && Array.isArray(r.perguntas) ? r.perguntas.slice(0,10).map(q=>{
+      const ops=(Array.isArray(q&&q.opcoes)?q.opcoes:[]).slice(0,4).map((o,j)=>({l:'abcd'[j],t:str(o&&o.t)||str(o)})).filter(o=>o.t);
+      const recIdx=ops.findIndex((o,j)=>(q.opcoes[j]&&str(q.opcoes[j].l).toLowerCase())===str(q.rec).toLowerCase());
+      return {tema:str(q.tema).slice(0,30), pergunta:str(q.pergunta), opcoes:ops, rec:ops[recIdx>=0?recIdx:0]?ops[recIdx>=0?recIdx:0].l:'a'};
+    }).filter(q=>q.pergunta && q.opcoes.length>=2) : [];
+    if(qs.length>=3){ S.perguntas=qs; S.resumo=str(r.resumo); }
+    else { S.perguntas=QPAD.map(q=>JSON.parse(JSON.stringify(q))); S.resumo=i.nome?`Você quer construir o ${i.nome}.`:''; if(S.mode!=='ia') S.mode='guiado'; }
+    S.resp={}; S.perguntas.forEach((q,j)=>{ S.resp[j]={l:q.rec,outro:''}; });
+    S.prd=''; S.prompts=[]; S.colados={}; S.savedId=null;
+    S.step='perguntas';
+  });
+}
+
+/* ---------- Passo 2 → 3: PRD e prompts ---------- */
+const PRD_MODEL = `# PRD — <Nome do app>
+
+## 1. Visão do produto
+(resumo em uma frase + o problema que resolve)
+## 2. Plataforma e tecnologia
+(Web/Lovable, Supabase, Auth, bibliotecas-chave sugeridas)
+## 3. Público-alvo
+## 4. Estrutura do produto
+(hierarquia de conteúdo)
+## 5. Autenticação e primeiro acesso
+(cadastro, login, recuperar senha, o que é criado automaticamente no 1º acesso, onboarding)
+## 6. Navegação principal
+(sidebar/menu, botão de ação principal, rotas/telas)
+## 7+. Uma seção por funcionalidade
+(para cada uma: campos, ações permitidas, atalhos, estados de carregamento/vazio/erro, salvamento)
+## Home / Dashboard
+## Busca
+## Compartilhamento e permissões
+## Exclusão e lixeira (se houver)
+## Banco de dados (Supabase)
+(tabela → campos com tipos → relacionamentos; inclua created_at, updated_at, owner_id e deleted_at quando houver lixeira)
+## Segurança
+(RLS por tabela, regras de acesso público, tokens)
+## Integrações
+## Design
+(estilo, dispositivo-alvo, referências)
+## Fluxo principal
+## Fora do escopo do MVP
+## Versão 2 (ideias para depois)
+## Riscos e o que validar primeiro
+## Critério de sucesso do MVP
+(checklist numerado e testável: "o usuário consegue…")
+## Decisões assumidas
+(o que você decidiu sem perguntar, para o usuário revisar)`;
+
+function cleanMd(t){
+  let s=String(t||'').trim();
+  s=s.replace(/^```(?:markdown|md)?\s*\n/i,'').replace(/\n```\s*$/,'');
+  const cut=s.search(/^##\s*Prompts para o Lovable/im);
+  if(cut>0) s=s.slice(0,cut).trim();
+  return s;
+}
+function parsePrompts(t){
+  const s=String(t||'').replace(/^```\w*\s*\n/,'').replace(/\n```\s*$/,'');
+  const re=/^#{2,4}\s*Prompt\s*(\d+)\s*[—–:\-]?\s*(.*)$/gim;
+  const marks=[]; let m;
+  while((m=re.exec(s))) marks.push({i:m.index,end:re.lastIndex,titulo:str(m[2])});
+  return marks.map((k,j)=>({titulo:k.titulo||('Fase '+(j+1)), texto:s.slice(k.end, j+1<marks.length?marks[j+1].i:s.length).trim()})).filter(p=>p.texto.length>40);
+}
+
+async function gerarPrd(){
+  S.notice='';
+  await run('Escrevendo o PRD…', async()=>{
+    const sample=await getSample();
+    if(!sample){ S.prd=templatePrd(); S.prompts=templatePrompts(); S.mode='guiado'; S.truncated=false; S.colados={}; S.tab='prd'; S.step='resultado'; return; }
+    const base=`${ctxIdeia()}
+${S.resumo?'Leitura confirmada: '+S.resumo+'\n':''}
+Respostas do usuário às perguntas de escopo:
+${respostasTxt()}`;
+    try{
+      CTL=new AbortController();
+      const r1=await sample(`Você é product manager da SinapsyIA. Escreva, em português do Brasil, o PRD de um MVP que será construído no Lovable (React + Vite + Tailwind + shadcn/ui + Supabase).
+
+${base}
+
+Regras:
+- Use exatamente esta estrutura de seções em Markdown, com conteúdo específico e concreto para este app (nomes de telas, campos, tipos, estados vazios e de erro):
+${PRD_MODEL}
+- O que o usuário não respondeu, decida você com o padrão mais sensato para um MVP enxuto e registre em "Decisões assumidas" (lista com marcadores).
+- Revise a consistência antes de terminar: todo item da navegação tem funcionalidade correspondente; toda funcionalidade tem as tabelas e campos de que precisa (ex.: lixeira → deleted_at); nada do escopo contradiz "Fora do escopo do MVP".
+- NÃO escreva a seção de prompts para o Lovable; ela vem depois.
+- Responda só com o Markdown do PRD, sem comentários antes ou depois.`,{signal:CTL.signal, modelTier:'complex', onText:({text})=>setLive(text)});
+      S.mode='ia';
+      S.prd=cleanMd(r1.text); S.truncated=!!r1.truncated;
+      if(!S.prd) throw {code:'empty'};
+      BUSY='Escrevendo os prompts para o Lovable…'; LIVE=''; render();
+      CTL=new AbortController();
+      const r2=await sample(`Você é especialista em construir apps no Lovable. A partir do PRD abaixo, escreva os prompts para colar no Lovable, em português do Brasil.
+
+Regras:
+- Um prompt por fase, incremental, um assunto por prompt, na ordem de construção. Ordem típica (adapte ao app, de 6 a 8 prompts):
+  1. Supabase, autenticação, tabelas, RLS e layout principal
+  2. Estrutura/organização (ex.: workspaces e projetos)
+  3. Funcionalidade central 1
+  4. Funcionalidade central 2
+  5. Home, recentes, busca, lixeira
+  6. Compartilhamento e integrações
+  7. Ajustes de UX, responsividade, performance e segurança
+- Cada prompt é autossuficiente e específico (nomes de telas, campos, comportamentos, estados vazios e de erro) e termina dizendo o que NÃO mudar no que já existe.
+- Formato obrigatório: cada prompt começa com uma linha "### Prompt N — <título curto>" e logo abaixo o texto do prompt, pronto para colar. Nada antes do primeiro prompt e nada depois do último.
+
+PRD:
+${S.prd}`,{signal:CTL.signal, modelTier:'complex', onText:({text})=>setLive(text)});
+      const ps=parsePrompts(r2.text);
+      S.prompts = ps.length ? ps : templatePrompts();
+      if(!ps.length) S.notice='Não consegui separar os prompts que a IA escreveu. Coloquei os prompts padrão da Sinapsy no lugar.';
+    }catch(e){
+      if(e && e.code==='cancelled') throw e;
+      if(PERMANENT.includes(e&&e.code)) S.mode='guiado';
+      if(!S.prd){ S.prd=templatePrd(); S.notice=errMsg(e)+' Montei o PRD com o modelo padrão da Sinapsy a partir das suas respostas.'; }
+      else S.notice=errMsg(e)+' O PRD ficou pronto; os prompts vieram do modelo padrão da Sinapsy.';
+      if(!S.prompts.length || !S.prd) S.prompts=templatePrompts();
+      S.prompts = S.prompts.length ? S.prompts : templatePrompts();
+    }
+    S.colados={}; S.tab='prd'; S.savedId=null; S.step='resultado';
+  });
+}
+
+/* ---------- Modelo padrão (sem IA) ---------- */
+function ansK(k){ const i=S.perguntas.findIndex(q=>q.k===k); return i<0?'':answerOf(i).txt; }
+function templatePrd(){
+  const n=str(S.ideia.nome)||'Meu app', d=str(S.ideia.descricao);
+  const est=ansK('estrutura'), login=ansK('login'), colab=ansK('colab'), up=ansK('uploads'), integ=ansK('integ'), plat=ansK('plat'), vis=ansK('visual');
+  const ws=/workspace/i.test(est), proj=/projeto/i.test(est);
+  const hier = ws?'Workspace → Projeto → Item':proj?'Projeto → Item':'Item (lista única por usuário)';
+  const semLogin=/sem login/i.test(login);
+  const tabs=['- **profiles**: id (uuid, = auth.users.id), nome (text), avatar_url (text), created_at, updated_at'];
+  if(ws) tabs.push('- **workspaces**: id (uuid), nome (text), owner_id (uuid → profiles), created_at, updated_at');
+  if(proj||ws) tabs.push(`- **projects**: id (uuid), ${ws?'workspace_id (uuid → workspaces), ':''}nome (text), descricao (text), owner_id (uuid), created_at, updated_at, deleted_at (timestamptz)`);
+  tabs.push(`- **items**: id (uuid), ${proj||ws?'project_id (uuid → projects), ':''}titulo (text), descricao (text), status (text: aberto | em andamento | concluído), owner_id (uuid), created_at, updated_at, deleted_at (timestamptz)`);
+  if(/imagens|arquivos/i.test(up) && !/^não$/i.test(up)) tabs.push('- **attachments**: id (uuid), item_id (uuid → items), path (text, Supabase Storage), nome (text), tamanho (int), owner_id (uuid), created_at');
+  if(/convites/i.test(colab)) tabs.push('- **members**: id (uuid), '+(ws?'workspace_id':'project_id')+' (uuid), user_id (uuid), papel (text: leitor | editor), created_at');
+  if(/link público/i.test(colab)) tabs.push('- **share_links**: id (uuid), project_id (uuid), token (text, único), ativo (bool), created_at');
+  return `# PRD — ${n}
+
+## 1. Visão do produto
+${d}
+
+## 2. Plataforma e tecnologia
+Web feito no Lovable (React + Vite + Tailwind + shadcn/ui) com Supabase (banco Postgres, Auth${/imagens|arquivos/i.test(up)&&!/^não$/i.test(up)?', Storage':''}). Bibliotecas sugeridas: react-hook-form + zod para formulários, date-fns para datas, TanStack Query para dados.
+
+## 3. Público-alvo
+${ansK('publico')}. ${ansK('uso')}.
+
+## 4. Estrutura do produto
+${hier}
+
+## 5. Autenticação e primeiro acesso
+${semLogin?'Sem login no MVP: o app abre direto na tela principal.':`Login por ${login.toLowerCase()}. Telas de cadastro, entrar e recuperar senha. No primeiro acesso, o app cria o perfil do usuário${ws?' e um workspace pessoal':''}${proj&&!ws?' e um projeto de exemplo':''} e mostra uma tela vazia explicando como criar o primeiro item.`}
+
+## 6. Navegação principal
+Barra lateral (no celular, menu inferior) com: Início, ${ws?'Workspaces, ':''}${proj||ws?'Projetos, ':''}Itens, ${/lixeira/i.test('lixeira')?'Lixeira, ':''}Configurações. Botão principal "Novo item" sempre visível.
+
+## 7. Itens (funcionalidade central)
+Objetivo do MVP: ${ansK('objetivo').toLowerCase()}.
+- Campos: título (obrigatório), descrição, status, datas de criação e atualização.
+- Ações: criar, editar, mudar status, mover para a lixeira.
+- Estados: carregando (skeleton), vazio (mensagem + botão "Criar primeiro item"), erro (mensagem com "Tentar de novo").
+- Salvamento: ao clicar em "Salvar", com aviso "Salvo".
+
+## Home / Dashboard
+Resumo com contagem de itens por status e lista dos itens atualizados recentemente.
+
+## Busca
+Campo de busca por título e descrição, com filtro por status.
+
+## Compartilhamento e permissões
+${colab}.
+
+## Exclusão e lixeira
+Itens excluídos vão para a Lixeira (deleted_at preenchido) e podem ser restaurados ou apagados de vez.
+
+## Banco de dados (Supabase)
+${tabs.join('\n')}
+
+## Segurança
+RLS ativo em todas as tabelas: cada usuário lê e altera só as linhas em que owner_id = auth.uid()${/convites/i.test(colab)?', além das linhas compartilhadas com ele em members (editor altera, leitor só lê)':''}${/link público/i.test(colab)?'. Leitura pública só por token ativo em share_links, via função segura':''}.
+
+## Integrações
+${integ}.
+
+## Design
+${vis}. Foco em ${plat.toLowerCase()}. Componentes do shadcn/ui, tipografia legível e espaçamento generoso.
+
+## Fluxo principal
+1. A pessoa cria a conta e entra.
+2. ${proj||ws?'Cria um projeto.':'Vê a lista vazia com a explicação.'}
+3. Cria os itens e atualiza o status no dia a dia.
+4. Acompanha tudo pelo Início.
+
+## Fora do escopo do MVP
+- App nativo para iOS/Android
+- Modo offline
+- Relatórios avançados e exportações
+${/nenhuma/i.test(integ)?'- Integrações externas (IA, pagamento, WhatsApp)\n':''}
+## Versão 2 (ideias para depois)
+- Notificações
+- Relatórios e exportação para planilha
+- Integrações que ficaram de fora do MVP
+
+## Riscos e o que validar primeiro
+- Validar com 3 a 5 usuários reais se os campos do item cobrem o dia a dia.
+- Testar as regras de RLS antes de convidar outras pessoas.
+
+## Critério de sucesso do MVP
+1. O usuário consegue criar a conta e entrar.
+2. O usuário consegue criar, editar e mudar o status de um item.
+3. O usuário consegue encontrar um item pela busca.
+4. O usuário consegue mandar um item para a lixeira e restaurar.
+5. Um usuário não vê os dados de outro.
+
+## Decisões assumidas
+- PRD montado no modo guiado, sem IA: revise as seções 7 em diante e detalhe as funcionalidades específicas do seu negócio.
+- Status padrão dos itens: aberto, em andamento, concluído.
+- Lixeira incluída no MVP.
+- Busca simples por texto, sem filtros avançados.`;
+}
+function templatePrompts(){
+  const n=str(S.ideia.nome)||'o app', d=str(S.ideia.descricao).slice(0,400);
+  const nao='\n\nNão altere nada fora do que este prompt pede.';
+  return [
+    {titulo:'Base: Supabase, login, tabelas e layout', texto:`Vamos construir ${n}: ${d}\n\nNesta primeira etapa, configure o Supabase com autenticação (${ansK('login')||'e-mail e senha'}), telas de cadastro, entrar e recuperar senha, e crie as tabelas descritas no PRD com RLS ativo (cada usuário só acessa as próprias linhas). Crie o layout principal com barra lateral (menu inferior no celular), as rotas vazias de cada tela e o botão principal "Novo item". Use shadcn/ui e o estilo: ${ansK('visual')||'limpo e profissional'}.`},
+    {titulo:'Estrutura e organização', texto:`Implemente a estrutura de conteúdo (${ansK('estrutura')||'projetos e itens'}): listar, criar, renomear e excluir, com estados de carregamento, vazio e erro.${nao.replace('Não altere nada fora','Não mude a autenticação, as tabelas nem o layout; não altere nada fora')}`},
+    {titulo:'Funcionalidade central', texto:`Implemente a tela de itens: lista com filtro por status, formulário de criar/editar (título obrigatório, descrição, status), mudança rápida de status e aviso "Salvo" após salvar. Estado vazio com botão "Criar primeiro item".${nao}`},
+    {titulo:'Detalhe do item e arquivos', texto:`Crie a página de detalhe do item com todas as informações e histórico de atualização.${/imagens|arquivos/i.test(ansK('uploads'))?' Adicione upload de anexos (Supabase Storage, bucket privado) com lista, download e exclusão.':''}${nao}`},
+    {titulo:'Início, busca e lixeira', texto:`Crie a tela Início com contagem de itens por status e os atualizados recentemente; a busca por título e descrição; e a Lixeira (itens com deleted_at), com restaurar e apagar de vez.${nao}`},
+    {titulo:'Compartilhamento e integrações', texto:`Implemente o compartilhamento: ${ansK('colab')||'nenhum no MVP'}. Integrações: ${ansK('integ')||'nenhuma no MVP'}. Ajuste as regras de RLS para isso.${nao}`},
+    {titulo:'Ajustes finais', texto:`Revise UX, responsividade (${ansK('plat')||'desktop e celular'}), mensagens de erro, performance das listas e as regras de RLS de todas as tabelas. Corrija o que estiver inconsistente com o PRD.\n\nNão adicione funcionalidades novas.`}
+  ];
+}
+
+/* ---------- Saídas ---------- */
+function fullMd(){
+  let o=S.prd.trim()+'\n\n## Prompts para o Lovable\n';
+  S.prompts.forEach((p,i)=>{ o+=`\n### Prompt ${i+1} — ${p.titulo}\n\n${p.texto}\n`; });
+  return o;
+}
+function decisoes(){
+  const m=/^##\s*Decis[õo]es assumidas\s*$/im.exec(S.prd); if(!m) return '';
+  const rest=S.prd.slice(m.index+m[0].length); const nx=rest.search(/^##\s/m);
+  return (nx<0?rest:rest.slice(0,nx)).trim();
+}
+function md(s){
+  try{ if(window.marked && window.DOMPurify) return window.DOMPurify.sanitize(window.marked.parse(String(s||''))); }catch(e){}
+  return '<pre class="raw">'+esc(s)+'</pre>';
+}
+async function copyText(t, btn){
+  const old=btn?btn.textContent:'';
+  try{ await navigator.clipboard.writeText(t); if(btn){ btn.textContent='Copiado'; setTimeout(()=>{btn.textContent=old;},1600);} return true; }
+  catch(e){ MSG='Não consegui copiar. Use "Baixar .md" ou selecione o texto.'; flash(); return false; }
+}
+function flash(){ const el=document.getElementById('msg'); if(el) el.textContent=MSG; }
+async function baixar(){
+  const dl=(window.claude && typeof window.claude.use==='function') ? await window.claude.use('downloads').catch(()=>null) : null;
+  if(!dl){ MSG='Download indisponível aqui. Use "Copiar PRD completo".'; flash(); return; }
+  try{ await dl.save({filename:`prd-${slug(S.ideia.nome)}.md`, data:new Blob([fullMd()],{type:'text/markdown'})}); MSG='Arquivo salvo. Confira a pasta de downloads.'; }
+  catch(e){ MSG = e&&e.code==='declined'?'Download cancelado.':'Não consegui baixar agora. Use "Copiar PRD completo".'; }
+  flash();
+}
+async function salvar(btn){
+  if(!DB) return;
+  btn.disabled=true; MSG='Salvando…'; flash();
+  const doc={nome:str(S.ideia.nome)||'Sem nome', ideia:S.ideia, contato:S.contato, envioId:S.envioId||null, resumo:S.resumo, perguntas:S.perguntas, resp:S.resp, prd:S.prd, prompts:S.prompts, colados:S.colados, modo:S.mode==='ia'?'ia':'guiado', atualizadoEm:Date.now()};
+  try{
+    if(S.savedId) await DB.collection('prds').doc(S.savedId).update(doc);
+    else { doc.criadoEm=Date.now(); const ref=DB.collection('prds').doc(); await ref.set(doc); S.savedId=ref.id; save(); }
+    if(S.envioId) DB.collection('envios').doc(S.envioId).update({prdId:S.savedId}).catch(()=>{});
+    MSG='Salvo em Meus PRDs.'; btn.textContent='Atualizar no painel';
+  }catch(e){ MSG=dbErr(e); }
+  btn.disabled=false; flash();
+}
+function openSaved(d){
+  const n=fresh();
+  const i=d.ideia||{}; n.ideia={nome:str(i.nome),descricao:str(i.descricao),referencias:str(i.referencias)}; n.resumo=str(d.resumo);
+  const c=d.contato||{}; n.contato={nome:str(c.nome),contato:str(c.contato)}; n.envioId=str(d.envioId)||null;
+  n.perguntas=normQs(d.perguntas); n.resp=normResp(d.resp);
+  n.prd=str(d.prd); n.prompts=Array.isArray(d.prompts)?d.prompts.filter(p=>p&&p.texto):[]; n.colados=d.colados||{};
+  n.mode=d.modo==='ia'?'ia':'guiado'; n.step='resultado'; n.savedId=d.id; n.prevStep='painel';
+  S=n; save(); render(); window.scrollTo({top:0});
+}
+
+/* ---------- Código de acesso ----------
+   Um código por cliente, criado/editado no Painel (docs col=codigos {codigo,nome,ativo}).
+   Vale nas 3 ferramentas; o banco confere (função sinapsy_codigo) e recusa envio sem código ativo.
+   (criarCodigo/desativar abaixo são da versão antiga e não aparecem mais na tela.) */
+const ACC_KEY='sinapsy-acesso-v3'; // igual nas 3 ferramentas e no runtime
+const ACC_CHAVE='I5nwt2BAF3pvLfWvOZPIbBHy'; // igual nos dois apps
+const ACC_ALFA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+let ACC={ok:false,hash:null,codigo:null,checked:false,err:'',busy:false,txt:''};
+let CODIGOS=null, COD_MSG='', COD_ERR=false;
+function normCode(c){ return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+async function sha(s){
+  const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return new Uint8Array(b);
+}
+async function hashCode(c){ return normCode(c); } // o código (normalizado) identifica o cliente
+async function assinatura(base){ const b=await sha('sinapsyia-v2:'+ACC_CHAVE+':'+normCode(base)); return Array.from(b.slice(0,4)).map(x=>ACC_ALFA[x%ACC_ALFA.length]).join(''); }
+// Conferido pelo banco (Supabase): o código existe e está ativo
+async function codigoValido(c){ return (await window.SinapsyAcesso.conferir(c))===true; }
+// true = desativado; false = ativo; null = não deu para conferir
+async function revogado(h){ return false; } // desativar = codigoValido falso
+async function initAcesso(){
+  let c=null; try{ c=localStorage.getItem(ACC_KEY); }catch(e){}
+  if(c && await codigoValido(c)){
+    const h=await hashCode(c), rv=await revogado(h);
+    if(rv===true){ try{ localStorage.removeItem(ACC_KEY); }catch(e){} }
+    else { ACC.ok=true; ACC.hash=h; ACC.codigo=normCode(c); }
+  }
+  ACC.checked=true;
+}
+async function entrarCodigo(){
+  if(ACC.busy) return;
+  const v=ACC.txt;
+  if(normCode(v).length<4){ ACC.err='Digite o código que a SinapsyIA te enviou.'; render(); return; }
+  ACC.busy=true; ACC.err=''; render();
+  let ok=false, rv=null, h=null;
+  try{ ok=await codigoValido(v); if(ok){ h=await hashCode(v); rv=await revogado(h); } }catch(e){}
+  ACC.busy=false;
+  if(ok && rv!==true){ ACC.ok=true; ACC.hash=h; ACC.codigo=normCode(v); ACC.txt=''; try{ localStorage.setItem(ACC_KEY,normCode(v)); }catch(e){} }
+  else ACC.err = ok ? 'Este código foi desativado. Peça um novo à SinapsyIA no Instagram @sinapsyia.' : 'Código inválido. Confira se digitou certo ou peça o seu à SinapsyIA no Instagram @sinapsyia.';
+  render(); window.scrollTo({top:0});
+}
+function vAcesso(titulo){
+  return `<section class="card stack acc">
+    <span class="eyebrow">Acesso por convite</span>
+    <h1>Necessita de código de verificação</h1>
+    <p class="muted">Para usar o ${esc(titulo)} da SinapsyIA, digite o código de verificação que você recebeu.</p>
+    <label class="f">Código de verificação<input type="text" id="acc-code" value="${esc(ACC.txt)}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ex.: ANA2026-K7P2" maxlength="40"></label>
+    ${ACC.err?`<p class="err" role="alert">${esc(ACC.err)}</p>`:''}
+    <div class="actions"><span class="muted" style="font-size:13px">Não tem código? Fale com a gente no Instagram <span class="handle">@sinapsyia</span>.</span><button class="btn" data-acc="entrar" ${ACC.busy?'disabled':''}>${ACC.busy?'Conferindo…':'Inserir código'}</button></div>
+  </section>`;
+}
+function baseDoNome(nome){
+  const p=normCode(String(nome).normalize('NFD').replace(/[̀-ͯ]/g,'')).replace(/[0-9]/g,'').slice(0,3)||'SNP';
+  const r=crypto.getRandomValues(new Uint8Array(2));
+  return p+Array.from(r).map(x=>ACC_ALFA[x%ACC_ALFA.length]).join('');
+}
+function subscribeCodigos(onChange){
+  DB.collection('codigos').onSnapshot(s=>{ CODIGOS=s.docs.map(d=>Object.assign({},d.data(),{id:d.id})); onChange(); }, ()=>{ if(CODIGOS===null){ CODIGOS=[]; onChange(); } });
+}
+async function criarCodigo(btn){
+  const nome=str((document.getElementById('cod-nome')||{}).value), cust=str((document.getElementById('cod-codigo')||{}).value);
+  if(!nome){ COD_ERR=true; COD_MSG='Escreva o nome do cliente.'; render(); return; }
+  const base = cust ? normCode(cust) : baseDoNome(nome);
+  if(base.length<3){ COD_ERR=true; COD_MSG='O começo do código precisa ter pelo menos 3 letras ou números.'; render(); return; }
+  if(base.length>20){ COD_ERR=true; COD_MSG='Use no máximo 20 letras ou números no começo do código.'; render(); return; }
+  btn.disabled=true; btn.textContent='Criando…';
+  try{
+    const codigo=base+'-'+await assinatura(base), h=await hashCode(codigo);
+    const ex=await DB.doc('codigos_admin/'+h).get();
+    if(ex.exists){ COD_ERR=true; COD_MSG=`O código ${codigo} já existe na lista.`; render(); return; }
+    await DB.doc('codigos_admin/'+h).set({codigo, nome, criadoEm:Date.now()});
+    try{ await DB.doc('revogados/'+h).delete(); }catch(e){}
+    COD_ERR=false; COD_MSG=`Código ${codigo} criado para ${nome}. Ele vale no Diagnóstico de IA e na Criação de App. Copie e envie junto com o link.`;
+  }catch(e){ COD_ERR=true; COD_MSG='Não consegui criar o código agora. Tente de novo.'; }
+  render();
+}
+async function desativar(h, apagarDaLista){
+  await DB.doc('revogados/'+h).set({em:Date.now()});
+  if(apagarDaLista) await DB.doc('codigos_admin/'+h).delete();
+}
+async function apagarCodigo(h){
+  try{ await desativar(h,true); COD_ERR=false; COD_MSG='Código desativado neste app. Para bloquear também no outro app, cole o código em "Desativar um código" no painel de lá.'; }
+  catch(e){ COD_ERR=true; COD_MSG='Não consegui desativar agora. Tente de novo.'; }
+  render();
+}
+async function desativarDigitado(btn){
+  const v=str((document.getElementById('cod-off')||{}).value);
+  if(!v){ COD_ERR=true; COD_MSG='Cole o código que você quer desativar.'; render(); return; }
+  if(!(await codigoValido(v))){ COD_ERR=true; COD_MSG='Esse não é um código válido da SinapsyIA.'; render(); return; }
+  btn.disabled=true;
+  try{ const h=await hashCode(v); await desativar(h,true); COD_ERR=false; COD_MSG=`Código ${normCode(v).slice(0,-4)}-${normCode(v).slice(-4)} desativado neste app.`; }
+  catch(e){ COD_ERR=true; COD_MSG='Não consegui desativar agora. Tente de novo.'; }
+  render();
+}
+function nomeDoCodigo(h){ const c=h&&(CODIGOS||[]).find(x=>normCode(x.codigo)===h); return c?`${c.nome} (${c.codigo})`:''; }
+function vCodigos(usos){
+  return `<section class="card row" style="justify-content:space-between">
+    <div><h2>Códigos de acesso</h2><p class="muted" style="font-size:13.5px">Os códigos dos clientes valem nas 3 ferramentas (Onboarding, Diagnóstico e Criação de App). Crie, edite e desative no Painel.</p></div>
+    <a class="btn ghost" href="../painel/#codigos" style="text-decoration:none">Abrir códigos no Painel</a>
+  </section>`;
+}
+document.addEventListener('click', async e=>{
+  const b=e.target.closest('[data-acc]'); if(!b) return;
+  const a=b.dataset.acc;
+  if(a==='entrar') entrarCodigo();
+  else if(a==='criar'){ if(OWNER&&DB) criarCodigo(b); }
+  else if(a==='desativar'){ if(OWNER&&DB) desativarDigitado(b); }
+  else if(a==='copiar'){ const t=b.dataset.cod; try{ await navigator.clipboard.writeText(t); b.textContent='Copiado'; setTimeout(()=>{b.textContent='Copiar';},1500); }catch(err){ COD_ERR=false; COD_MSG='Código: '+t+' (selecione e copie)'; render(); } }
+  else if(a==='apagar'){ if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; } b.disabled=true; apagarCodigo(b.dataset.h); }
+});
+document.addEventListener('input', e=>{ if(e.target && e.target.id==='acc-code') ACC.txt=e.target.value; });
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target && e.target.id==='acc-code'){ e.preventDefault(); entrarCodigo(); } });
+
+/* ---------- Render ---------- */
+const app=document.getElementById('app'), top=document.getElementById('top');
+const LOGO='<svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M21 10.5c-1.2-1.3-3-2-5-2-3 0-5 1.6-5 3.8 0 4.9 10 3 10 7.6 0 2.3-2.2 3.8-5.2 3.8-2.2 0-4.2-.8-5.4-2.3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="21" cy="10.5" r="1.9" fill="#fff"/><circle cx="10.4" cy="21.4" r="1.9" fill="#fff"/></svg>';
+
+function renderTop(){
+  const idx={ideia:0,perguntas:1,resultado:2,enviado:2,painel:-1}[S.step];
+  const names=['Ideia','Perguntas',OWNER?'PRD e prompts':'Enviado'];
+  const novos=(ENVIOS||[]).filter(e=>!e.prdId).length;
+  top.innerHTML=`<div class="brand">${LOGO}SinapsyIA</div>
+    ${OWNER&&DB?`<button class="btn ghost sm" data-act="painel">Meus PRDs${novos?' · '+novos+(novos===1?' novo':' novos'):''}</button>`:''}
+    <nav class="steps" aria-label="Etapas">${names.map((n,i)=>`<span class="st ${i===idx?'on':i<idx?'done':''}"><b>${i<idx?'✓':i+1}</b>${n}</span>`).join('')}</nav>`;
+}
+
+function vBusy(){
+  const streaming=/PRD|prompts/.test(BUSY);
+  return `<section class="stack">
+    <div class="busy" role="status"><span class="spin"></span><div><strong>${esc(BUSY)}</strong><small>${streaming?(/prompts/.test(BUSY)?'Etapa 2 de 2':'Etapa 1 de 2')+' · <span id="livecount">0 caracteres</span> · leva de 1 a 3 minutos':'Leva alguns segundos.'}</small></div>
+    <button class="btn ghost sm" data-act="cancel" style="margin-left:auto">Cancelar</button></div>
+    ${streaming?`<pre class="live" id="live" aria-label="Texto sendo escrito">${esc(LIVE)}</pre>`:''}
+  </section>`;
+}
+
+function vIdeia(){
+  const i=S.ideia;
+  return `<section class="hero">
+    <span class="eyebrow">Brainstorm de app</span>
+    <h1>Da ideia ao <span class="grad-text">PRD pronto para o Lovable</span></h1>
+    ${OWNER?`<p class="lead">Descreva o app que você quer construir. A IA faz até 10 perguntas de escopo, escreve o PRD completo e entrega os prompts na ordem certa para colar no Lovable.</p>`
+      :`<p class="lead">Descreva o app que você quer construir e responda até 10 perguntas rápidas de escopo. A Sinapsy usa suas respostas para preparar o plano completo do seu app.</p>`}
+    <div class="stack-tags"><span>React + Vite</span><span>Tailwind</span><span>shadcn/ui</span><span>Supabase</span></div>
+    <ol class="how"><li><strong>Conte a ideia</strong> em poucas frases.</li><li><strong>Responda as perguntas</strong>: a opção recomendada já vem marcada.</li>${OWNER?'<li><strong>Receba o PRD e os prompts</strong> para copiar ou baixar em .md.</li>':'<li><strong>Salve as respostas</strong> e a Sinapsy fala com você com o plano do app.</li>'}</ol>
+  </section>
+  ${S.notice?`<p class="notice">${esc(S.notice)}</p>`:''}
+  <section class="card stack">
+    <label class="f">Nome do app <small>(pode ser provisório)</small><input type="text" id="f-nome" data-f="nome" value="${esc(i.nome)}" placeholder="Ex.: AgendaPet" maxlength="60"></label>
+    <label class="f">Qual é a ideia? <small>O que o app faz, para quem e que problema resolve.</small><textarea id="f-desc" data-f="descricao" placeholder="Ex.: App para pet shops organizarem banho e tosa. O tutor agenda pelo celular…">${esc(i.descricao)}</textarea></label>
+    <label class="f">Já tem algo pronto? <small>Opcional: apps parecidos, anotações ou um PRD. O que já estiver respondido aqui não vira pergunta.</small><textarea id="f-ref" data-f="referencias" style="min-height:80px" placeholder="Ex.: Parecido com o Calendly, mas com cadastro do pet.">${esc(i.referencias)}</textarea></label>
+    ${!OWNER?`<div class="two">
+      <label class="f">Seu nome<input type="text" id="c-nome" data-c="nome" value="${esc(S.contato.nome)}" placeholder="Ex.: Ana Souza" maxlength="80" autocomplete="name"></label>
+      <label class="f">WhatsApp ou Instagram<input type="text" id="c-contato" data-c="contato" value="${esc(S.contato.contato)}" placeholder="Ex.: (81) 99999-9999 ou @ana" maxlength="80"></label>
+    </div>`:''}
+    ${FORM_ERR?`<p class="err">${esc(FORM_ERR)}</p>`:''}
+    <div class="actions"><button class="btn ghost" data-act="exemplo">Preencher com um exemplo</button><button class="btn" data-act="perguntas">Gerar perguntas</button></div>
+  </section>`;
+}
+
+function vPerguntas(){
+  return `<section class="stack">
+    <span class="eyebrow">${S.perguntas.length} perguntas de escopo</span>
+    <h1>Responda o que muda o app</h1>
+    ${S.resumo?`<p class="reading">${esc(S.resumo)}</p>`:''}
+    ${OWNER&&S.envioId?`<p class="notice" style="border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.07);color:var(--fg)">Respostas enviadas por <strong>${esc(S.contato.nome||'visitante')}</strong>${S.contato.contato?' · '+esc(S.contato.contato):''}. Confira e toque em "Gerar PRD e prompts".</p>`:''}
+    <p class="muted">A opção recomendada para um MVP enxuto já está marcada. Mude só o que quiser; o que ficar em aberto vira "decisão assumida" no PRD.</p>
+    ${S.notice?`<p class="notice">${esc(S.notice)}</p>`:''}
+    <div class="quick"><input type="text" id="quick" placeholder="Responder rápido: 1b, 2c, 3a…" aria-label="Responder rápido"><button class="btn ghost sm" data-act="quick">Aplicar</button></div>
+  </section>
+  <div class="qs">${S.perguntas.map((q,i)=>{
+    const r=S.resp[i]||{l:q.rec};
+    return `<fieldset class="q" style="margin:0"><div class="q-h"><span class="q-n">${i+1}</span><div class="q-t">${q.tema?`<span class="tema">${esc(q.tema)}</span>`:''}<h3>${esc(q.pergunta)}</h3></div></div>
+      <div class="opts" role="radiogroup">${q.opcoes.map(o=>`<label class="opt"><input type="radio" name="q${i}" value="${o.l}" data-q="${i}" ${r.l===o.l?'checked':''}><span class="l">${o.l}</span><span class="tx">${esc(o.t)}${o.l===q.rec?'<span class="rec">recomendado</span>':''}</span></label>`).join('')}
+        <label class="opt"><input type="radio" name="q${i}" value="outro" data-q="${i}" ${r.l==='outro'?'checked':''}><span class="l">✎</span><span class="tx">Outra resposta<input type="text" id="o${i}" data-o="${i}" value="${esc(r.outro||'')}" placeholder="Escreva a sua resposta"></span></label>
+      </div></fieldset>`;}).join('')}</div>
+  ${FORM_ERR?`<p class="err">${esc(FORM_ERR)}</p>`:''}
+  <div class="actions">${OWNER&&S.prevStep==='painel'?'<button class="btn ghost" data-act="painel">Voltar para Meus PRDs</button>':'<button class="btn ghost" data-act="voltar-ideia">Voltar e editar a ideia</button>'}
+    ${OWNER?'<button class="btn" data-act="gerar">Gerar PRD e prompts</button>':'<button class="btn" data-act="enviar">Salvar</button>'}</div>`;
+}
+
+function vEnviado(){
+  const nm=esc(S.ideia.nome||'seu app');
+  if(S.sent==='db') return `<section class="card stack">
+    <span class="eyebrow">Respostas salvas</span>
+    <h1>Pronto, recebemos a sua ideia</h1>
+    <p class="muted" style="font-size:16px;max-width:60ch">A Sinapsy vai preparar o plano do ${nm} a partir das suas respostas e falar com você${S.contato.contato?' em <strong style="color:var(--fg)">'+esc(S.contato.contato)+'</strong>':''}.</p>
+    <div class="row"><a class="btn ghost" href="${IG}" target="_blank" rel="noopener">Falar com a Sinapsy no Instagram</a><span class="muted">ou procure <span class="handle">@sinapsyia</span></span></div>
+  </section>
+  <div class="actions"><span></span><button class="btn ghost" data-act="novo-direto">Começar outro app</button></div>`;
+  return `<section class="stack">
+    <span class="eyebrow">Falta um passo</span>
+    <h1>Envie suas respostas para a Sinapsy</h1>
+    <p class="muted" style="max-width:62ch">Não consegui salvar direto por aqui. Copie a mensagem abaixo e mande no Instagram da Sinapsy: com ela, preparamos o plano do ${nm}.</p>
+  </section>
+  <section class="card stack share">
+    <textarea id="envio-txt" readonly aria-label="Mensagem com as suas respostas">${esc(envioMsg())}</textarea>
+    <div class="row"><button class="btn" data-act="copiar-envio">Copiar mensagem</button><a class="btn ghost" href="${IG}" target="_blank" rel="noopener">Abrir conversa no Instagram</a><span class="muted">ou procure <span class="handle">@sinapsyia</span></span></div>
+    <span id="msg" class="muted" role="status" style="font-size:13px"></span>
+  </section>
+  <div class="actions"><button class="btn ghost" data-act="voltar-perguntas">Mudar respostas</button><button class="btn ghost" data-act="novo-direto">Começar outro app</button></div>`;
+}
+
+function vResultado(){
+  const dec=decisoes(), total=S.prompts.length, feitos=S.prompts.filter((p,i)=>S.colados[i]).length;
+  return `<section class="res-head">
+    <span class="eyebrow">PRD pronto${S.mode==='guiado'?' · modelo padrão':''}</span>
+    <h1>${esc(S.ideia.nome||'Seu app')}</h1>
+    ${S.contato.nome||S.contato.contato?`<p class="muted">Cliente: <strong style="color:var(--fg)">${esc(S.contato.nome)}</strong>${S.contato.contato?' · <span style="user-select:all">'+esc(S.contato.contato)+'</span>':''}</p>`:''}
+    ${S.resumo?`<p class="reading">${esc(S.resumo)}</p>`:''}
+  </section>
+  ${S.notice?`<p class="notice">${esc(S.notice)}</p>`:''}
+  ${S.truncated?`<p class="notice">O PRD ficou longo e foi cortado no fim. Confira as últimas seções antes de usar.</p>`:''}
+  <div class="toolbar">
+    <button class="btn" data-act="baixar">Baixar .md</button>
+    <button class="btn ghost" data-act="copiar-tudo">Copiar PRD completo</button>
+    ${OWNER&&DB?`<button class="btn ghost" data-act="salvar">${S.savedId?'Atualizar no painel':'Salvar em Meus PRDs'}</button>`:''}
+    <span id="msg" class="muted" role="status" style="font-size:13px">${esc(MSG)}</span>
+  </div>
+  ${dec?`<section class="decide"><h3>Revise as decisões assumidas</h3><p class="muted" style="font-size:13px">Isto foi decidido sem perguntar. Se algo não bate, volte às perguntas, mude a resposta e gere de novo.</p><div class="md-body">${md(dec)}</div></section>`:''}
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="${S.tab==='prd'}" data-tab="prd">PRD</button>
+    <button class="tab" role="tab" aria-selected="${S.tab==='prompts'}" data-tab="prompts">Prompts para o Lovable<span class="c">${feitos}/${total}</span></button>
+  </div>
+  ${S.tab==='prd' ? `<article class="card md-body">${md(S.prd)}</article>` : `
+  <section class="stack">
+    <p class="muted">Cole um prompt por vez no Lovable, na ordem. Teste o que foi feito antes de colar o próximo e marque aqui o que já foi.</p>
+    <div class="progress" aria-label="${feitos} de ${total} prompts colados"><i style="width:${total?Math.round(feitos/total*100):0}%"></i></div>
+    <div class="prompts">${S.prompts.map((p,i)=>`<article class="pcard ${S.colados[i]?'done':''}">
+      <div class="pc-h"><span class="pc-n">PROMPT ${i+1}</span><h3>${esc(p.titulo)}</h3><button class="btn sm" data-copy="${i}">Copiar</button></div>
+      <pre class="pc-b">${esc(p.texto)}</pre>
+      <div class="pc-f"><label class="tog"><input type="checkbox" id="col${i}" data-col="${i}" ${S.colados[i]?'checked':''}>Já colei no Lovable</label></div>
+    </article>`).join('')}</div>
+  </section>`}
+  <div class="actions"><button class="btn ghost" data-act="${S.prevStep==='painel'?'painel':'voltar-perguntas'}">${S.prevStep==='painel'?'Voltar para Meus PRDs':'Mudar respostas'}</button><button class="btn ghost" data-act="novo">Começar outro app</button></div>`;
+}
+
+function vPainel(){
+  const byDate=(a,b)=>(b.atualizadoEm||b.criadoEm||0)-(a.atualizadoEm||a.criadoEm||0);
+  const dt=d=>new Date(d.atualizadoEm||d.criadoEm||0).toLocaleDateString('pt-BR');
+  const envios=(ENVIOS||[]).slice().sort((a,b)=>(!!a.prdId-!!b.prdId)||byDate(a,b));
+  const list=(PRDS||[]).slice().sort(byDate);
+  const ct=c=>{ c=c||{}; return [str(c.nome),str(c.contato)].filter(Boolean).map(esc).join(' · '); };
+  let rec, prds;
+  if(DB_ERR){ rec=`<p class="err">${esc(DB_ERR)}</p>`; prds=''; }
+  else {
+    rec = ENVIOS===null?'<p class="muted">Carregando…</p>' : !envios.length?'<p class="muted">Nenhuma resposta recebida ainda. Quando um visitante tocar em "Salvar", ela aparece aqui.</p>'
+      : `<div class="saved">${envios.map(d=>`<div class="srow"><button class="sopen" data-envio="${esc(d.id)}"><span class="nm">${esc(d.nome)} ${d.prdId?'<span class="badge done">PRD gerado</span>':d.novo?'<span class="badge new">Novo</span>':''}</span><span class="meta">${ct(d.contato)||'sem contato'} · ${dt(d)}${nomeDoCodigo(d.acesso)?' · código de '+esc(nomeDoCodigo(d.acesso)):''}</span></button><button class="btn ghost sm" data-delenv="${esc(d.id)}">Apagar</button></div>`).join('')}</div>`;
+    prds = PRDS===null?'<p class="muted">Carregando…</p>' : !list.length?'<p class="muted">Nenhum PRD salvo ainda. Abra uma resposta recebida, gere o PRD e toque em "Salvar em Meus PRDs".</p>'
+      : `<div class="saved">${list.map(d=>{const np=Array.isArray(d.prompts)?d.prompts.length:0; const c=ct(d.contato);
+        return `<div class="srow"><button class="sopen" data-open="${esc(d.id)}"><span class="nm">${esc(d.nome)}</span><span class="meta">${c?c+' · ':''}${dt(d)} · ${np} prompts</span></button><button class="btn ghost sm" data-del="${esc(d.id)}">Apagar</button></div>`;}).join('')}</div>`;
+  }
+  return `<section class="stack"><span class="eyebrow">Só você vê esta área</span><h1>Meus PRDs</h1></section>
+  <section class="stack"><h2>Respostas recebidas</h2><p class="muted" style="font-size:13.5px">Abra uma resposta, confira e gere o PRD e os prompts.</p>${rec}</section>
+  <section class="stack"><h2>PRDs prontos</h2>${prds}</section>
+  ${vCodigos(h=>(ENVIOS||[]).filter(e=>e.acesso===h).length)}
+  <section class="card stack"><h3>Recebeu as respostas pelo Instagram?</h3><p class="muted" style="font-size:13.5px">Quando o visitante não consegue salvar pelo site, ele manda uma mensagem com um código. Cole a mensagem inteira aqui.</p>
+    <textarea id="importbox" placeholder="Cole a mensagem que o visitante mandou…" aria-label="Mensagem do visitante">${esc(IMPORT_TXT)}</textarea>
+    ${PANEL_MSG?`<p class="${PANEL_ERR?'err':'okmsg'}">${esc(PANEL_MSG)}</p>`:''}
+    <div class="actions"><span></span><button class="btn ghost" data-act="importar">Importar respostas</button></div></section>
+  <div class="actions"><button class="btn ghost" data-act="sair-painel">Voltar</button><button class="btn" data-act="novo-direto">Novo brainstorm</button></div>`;
+}
+
+function render(){
+  renderTop();
+  app.className = S.step==='resultado'||S.step==='painel' ? 'wrap wide' : 'wrap';
+  // Visitante só entra com código de acesso válido.
+  if(!OWNER){
+    if(!OWNER_CHECKED){ app.className='wrap'; app.innerHTML='<p class="muted" style="padding-top:24px">Carregando…</p>'; return; }
+    if(!ACC.ok){ app.className='wrap'; app.innerHTML=vAcesso('Criação de App'); return; }
+  }
+  if(BUSY){ app.innerHTML=vBusy(); setLive(LIVE); return; }
+  // PRD e painel são só do dono: o visitante nunca vê essas telas.
+  if((S.step==='resultado'||S.step==='painel') && !OWNER){
+    if(!OWNER_CHECKED){ app.innerHTML='<p class="muted">Carregando…</p>'; return; }
+    S.step = S.perguntas.length ? 'perguntas' : 'ideia'; save(); renderTop();
+  }
+  app.innerHTML = S.step==='perguntas'?vPerguntas() : S.step==='resultado'?vResultado() : S.step==='painel'?vPainel() : S.step==='enviado'?vEnviado() : vIdeia();
+  app.insertAdjacentHTML('beforeend','<footer class="foot">SinapsyIA · brainstorm de apps para o Lovable</footer>');
+}
+function go(step){ S.step=step; S.notice=''; MSG=''; FORM_ERR=''; save(); render(); window.scrollTo({top:0}); }
+
+/* ---------- Eventos (delegação) ---------- */
+app.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.dataset.f){ S.ideia[t.dataset.f]=t.value; save(); }
+  else if(t.dataset.c){ S.contato[t.dataset.c]=t.value; save(); }
+  else if(t.id==='importbox'){ IMPORT_TXT=t.value; }
+  else if(t.dataset.o!==undefined){ const i=+t.dataset.o; S.resp[i]={l:'outro',outro:t.value}; const rb=app.querySelector(`input[name="q${i}"][value="outro"]`); if(rb) rb.checked=true; save(); }
+});
+app.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.dataset.q!==undefined){ const i=+t.dataset.q; S.resp[i]={l:t.value,outro:(S.resp[i]&&S.resp[i].outro)||''}; save(); }
+  else if(t.dataset.col!==undefined){ S.colados[+t.dataset.col]=t.checked; save(); render(); }
+});
+document.addEventListener('click', async e=>{
+  const b=e.target.closest('[data-act],[data-tab],[data-copy],[data-open],[data-del],[data-envio],[data-delenv]'); if(!b) return;
+  if(b.dataset.tab){ S.tab=b.dataset.tab; save(); render(); return; }
+  if(b.dataset.envio){
+    const d=(ENVIOS||[]).find(x=>x.id===b.dataset.envio); if(!d) return;
+    abrirEnvio(d);
+    return;
+  }
+  if(b.dataset.delenv){
+    if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; }
+    b.disabled=true; try{ await DB.collection('envios').doc(b.dataset.delenv).delete(); }catch(err){ DB_ERR='Não consegui apagar agora. Tente de novo.'; render(); }
+    return;
+  }
+  if(b.dataset.copy!==undefined){ const p=S.prompts[+b.dataset.copy]; if(p) copyText(p.texto,b); return; }
+  if(b.dataset.open){ const d=(PRDS||[]).find(x=>x.id===b.dataset.open); if(d) openSaved(d); return; }
+  if(b.dataset.del){
+    if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirmar'; return; }
+    b.disabled=true; try{ await DB.collection('prds').doc(b.dataset.del).delete(); if(S.savedId===b.dataset.del){ S.savedId=null; save(); } }catch(err){ DB_ERR='Não consegui apagar agora. Tente de novo.'; render(); }
+    return;
+  }
+  const a=b.dataset.act;
+  if(a==='cancel'){ if(CTL) CTL.abort(); return; }
+  if(BUSY) return;
+  if(a==='exemplo'){ S.ideia=Object.assign({},EXEMPLO); FORM_ERR=''; save(); render(); }
+  else if(a==='perguntas') gerarPerguntas();
+  else if(a==='quick'){
+    const v=(document.getElementById('quick')||{}).value||''; let n=0; const re=/(\d+)\s*([a-d])/gi; let m;
+    while((m=re.exec(v))){ const i=+m[1]-1, l=m[2].toLowerCase(); const q=S.perguntas[i]; if(q&&q.opcoes.some(o=>o.l===l)){ S.resp[i]={l,outro:''}; n++; } }
+    S.notice = n?'':'Não reconheci nenhuma resposta. Use o formato 1b, 2c, 3a.'; save(); render();
+  }
+  else if(a==='gerar'){ if(OWNER) gerarPrd(); }
+  else if(a==='enviar') enviar(b);
+  else if(a==='copiar-envio'){ const ok=await copyText(envioMsg(), b); if(!ok){ const ta=document.getElementById('envio-txt'); if(ta){ ta.focus(); ta.select(); } } }
+  else if(a==='importar'){
+    const p=unpack(IMPORT_TXT);
+    if(!p){ PANEL_ERR=true; PANEL_MSG='Não encontrei o código das respostas nesse texto. Peça para a pessoa tocar em "Copiar mensagem" de novo e colar a mensagem inteira.'; render(); return; }
+    b.disabled=true; b.textContent='Salvando…';
+    try{
+      const i=p.i||{}, c=p.c||{};
+      await DB.collection('envios').doc().set({nome:str(i.nome)||'Sem nome', contato:{nome:str(c.nome),contato:str(c.contato)}, ideia:{nome:str(i.nome),descricao:str(i.descricao),referencias:str(i.referencias)}, resumo:str(p.r), perguntas:normQs(p.q), resp:normResp(p.a), origem:'enviado pelo Instagram', criadoEm:Date.now()});
+      IMPORT_TXT=''; PANEL_ERR=false; PANEL_MSG=`Respostas de ${str(c.nome)||str(i.nome)||'visitante'} salvas em Respostas recebidas.`;
+    }catch(err){ PANEL_ERR=true; PANEL_MSG=dbErr(err); }
+    render();
+  }
+  else if(a==='voltar-ideia') go('ideia');
+  else if(a==='voltar-perguntas'){ if(S.perguntas.length) go('perguntas'); else go('ideia'); }
+  else if(a==='baixar') baixar();
+  else if(a==='copiar-tudo') copyText(fullMd(), b);
+  else if(a==='copiar-resumo'){
+    const t=`Olá, Sinapsy! Fiz o brainstorm de um app e quero orçamento para construir.\n\nApp: ${S.ideia.nome||'(sem nome)'}\n${S.resumo||S.ideia.descricao}\n\nMinhas respostas:\n${S.perguntas.map((q,i)=>`- ${q.pergunta} ${answerOf(i).txt}`).join('\n')}\n\nPrompts gerados: ${S.prompts.length}`;
+    copyText(t,b);
+  }
+  else if(a==='salvar') salvar(b);
+  else if(a==='painel'){ if(S.step!=='painel') S.prevStep=S.step; go('painel'); }
+  else if(a==='sair-painel'){ S.step = S.prevStep&&S.prevStep!=='painel' ? S.prevStep : 'ideia'; S.prevStep=null; save(); render(); window.scrollTo({top:0}); }
+  else if(a==='novo'){
+    if(b.dataset.confirm){ S=fresh(); save(); render(); window.scrollTo({top:0}); }
+    else { b.dataset.confirm='1'; b.textContent='Toque de novo para apagar e recomeçar'; }
+  }
+  else if(a==='novo-direto'){ S=fresh(); save(); render(); window.scrollTo({top:0}); }
+});
+
+render();
+samplePromise.then(s=>{ if(!s && S.mode!=='guiado'){ S.mode='guiado'; save(); renderTop(); } });
+})();
+</script>
